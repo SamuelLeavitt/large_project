@@ -1,0 +1,35 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Node dependencies
+node_modules/
+
+# VS Code
+.vscode/
+
+# logs
+npm-debug.log*
+*.log
+yarn-debug.log*
+yarn-error.log*
+pids
+logs
+*.pid
+*.pid.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# nvim/vim
+*.swp
+*.swo
+*.swn
+*~
+
+# build files
+dist/
+build/
+client/dist/
