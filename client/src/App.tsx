@@ -24,8 +24,11 @@ function App(){
   return (
     <Router>
 
-      {/* Pass the login status to the Navbar: If false show login/register links, else show workout app relevant links */}
-      <Navbar isLoggedIn={isLoggedIn}/> {/* Includes the Navbar components to all pages. */}
+      {/* Pass the login status to the Navbar: If false show login/register links, else show workout app relevant links 
+          isLoggedIn={isLoggedIn}: A state variable is being passed to the Navbar.
+          setIsLoggedIn={setIsLoggedIn}: A Setter function is being passed to the Navbar.
+      */}
+      <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/> {/* Includes the Navbar components to all pages. */}
 
         {/* Define the routes to the various pages for this workout app */}
       <Routes>

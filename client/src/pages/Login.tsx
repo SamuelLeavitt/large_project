@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
 
 interface LoginProps {
     setIsLoggedIn: (loggedIn: boolean) => void;
@@ -15,12 +16,12 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
     }
 
     return (
-        <div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
             <h1>Login Page</h1>
             <p> Please log in to your account.</p>
 
             {/* Dummy Login Button to redirect to Home page */}
-            <button onClick={handleLogin}>Log In</button> 
+            <Button label="Log In" variant="primary" onClick={handleLogin} />
         </div>
     );
 };

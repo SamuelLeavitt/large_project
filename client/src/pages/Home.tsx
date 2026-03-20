@@ -1,7 +1,7 @@
 // New Home page component
 const Home = () => {
     return (
-        <div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
             <h1>Home Page</h1>
             <p> Welcome to the workout app!</p>
         </div>
