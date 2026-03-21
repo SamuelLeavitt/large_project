@@ -51,6 +51,10 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                             <Button label="Profile" variant="secondary" onClick={() => { }} />
                         </Link>
 
+                        <Link to="/workout" style={{ textDecoration: 'none' }}>
+                            <Button label="Workout" variant="secondary" onClick={() => { }} />
+                        </Link>
+
                         <Button label="Logout" variant="danger" onClick={handleLogout} />
                     </>
                 ) : (

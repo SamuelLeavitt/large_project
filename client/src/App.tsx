@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Workout from './pages/Workout';
 
 // Import Navbar
 import Navbar from './components/Navbar';
@@ -41,6 +42,8 @@ function App(){
         <Route path = "/register" element={<Register />} />
 
         <Route path = "/profile" element={isLoggedIn ? <Profile /> : <Navigate to='/login' />} />
+
+        <Route path="/workout" element={isLoggedIn ? <Workout /> : <Navigate to='/login' />} />
       </Routes>
 
     </Router>
