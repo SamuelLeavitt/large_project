@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
 import Button from "./Button";
+import SearchBar from "./SearchBar";
 
 
 interface NavbarProps {
@@ -18,8 +19,9 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
     };
 
     return (
+        // Navbar Container styling.
         <nav style={{
-            display: 'flex',              // Use Flexbox: 
+            display: 'flex',              // Use Flexbox: Align children horizontally and space them out.
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '12px 24px',
@@ -32,8 +34,27 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
             zIndex: 1000,                   // Ensures the navbar stays above other content
         }}>
 
-            <strong>Workout App</strong>
+            {/*Left side of Navbar: Title*/}
+            <strong style={{
+                fontSize: '1.2rem',
+                minWidth: 'fit-content'
+            }}>💪 Workout App</strong>
 
+            {/*Center of Navbar: Search Bar (Only shows if logged in)*/}
+            <div style={{
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '0 20px'
+            }}>
+                {isLoggedIn && (
+                    <SearchBar />
+                )}
+            </div>
+
+            {/*Right side of Navbar: 
+                isLoggedIn = False, shows Login/Register/ThemeToggle
+                isLoggedIn = True, shows Profile/Workout/Logout/ThemeToggle*/}
             <div style={{
                 display: 'flex',       // Align children horizontally
                 alignItems: 'center',  // Center them vertically
@@ -43,6 +64,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                 {/* If isLoggedIn = false, show login and register links */}
                 {isLoggedIn ? (
                     <>
+
                         <Link to="/" style={{ textDecoration: 'none' }}>
                             <Button label="Home" variant="secondary" onClick={() => { }} />
                         </Link>
@@ -58,7 +80,9 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                         <Button label="Logout" variant="danger" onClick={handleLogout} />
                     </>
                 ) : (
+
                     <>
+
                         <Link to="/login" style={{ textDecoration: 'none' }}>
                             <Button label="Login" variant="secondary" onClick={() => { }} />
                         </Link>

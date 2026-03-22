@@ -11,8 +11,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Workout from './pages/Workout';
 
+
+
 // Import Navbar
 import Navbar from './components/Navbar';
+import WorkoutSearchByCategory from './pages/WorkoutSearchByCategory';
 
 
 function App(){
@@ -44,6 +47,8 @@ function App(){
         <Route path = "/profile" element={isLoggedIn ? <Profile /> : <Navigate to='/login' />} />
 
         <Route path="/workout" element={isLoggedIn ? <Workout /> : <Navigate to='/login' />} />
+
+        <Route path="/WorkoutSearchByCategory" element={<WorkoutSearchByCategory />} />
       </Routes>
 
     </Router>
