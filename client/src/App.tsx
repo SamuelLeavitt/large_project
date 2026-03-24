@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Workout from './pages/Workout';
+import WorkoutHistory from './pages/WorkoutHistory';
 
 
 
@@ -49,6 +50,9 @@ function App(){
         <Route path="/workout" element={isLoggedIn ? <Workout /> : <Navigate to='/login' />} />
 
         <Route path="/WorkoutSearchByCategory" element={<WorkoutSearchByCategory />} />
+        
+        <Route path="/workout-history" element={isLoggedIn ? <WorkoutHistory /> : <Navigate to='/login' />} />
+      
       </Routes>
 
     </Router>
