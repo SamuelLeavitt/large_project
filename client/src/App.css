@@ -182,3 +182,83 @@
     border-right-color: var(--border);
   }
 }
+
+.workout-list {
+  text-align: left;
+  margin-left: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 50px;
+}
+
+.session-block__row {
+  text-align: left;
+  margin: 20px;
+  padding: 10px;
+  font-size: 18px;
+  background: #3e067a;
+  color: white;
+}
+
+.session-block__exercise-name{
+  font-weight: bold;
+  font-size: 18px;
+  margin-top:40px;
+  margin-bottom: 40px;
+  padding: 40px 10px;
+}
+.session-block__body{
+  margin-left: 20px;
+}
+
+.session-block__set-chip{
+  text-align: left;
+  background: var(--accent-bg);
+  color: var(--accent);
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-left: 40px;
+}
+
+.workout-history__exercise-btn{
+  padding: 6px 12px;
+  margin:10px;
+  border-radius: 4px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.3s;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+}
+
+.workout-chart__toggle-btn{
+  margin: 10px;
+  border-radius: 4px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.3s;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+}
+
+.workout-chart{
+  padding: 20px;
+}
+
+.workout-tooltip{
+  background: var(--accent-bg);
+  color: var(--accent);
+  padding: 10px;
+  font-size: 10px;
+
+}
+
