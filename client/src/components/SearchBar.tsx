@@ -10,7 +10,12 @@ const SearchBar = () => {
 
     return (
         // Search Bar Container.
-        <div style={{ position: 'relative', width: '300px' }}>
+        <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '400px',
+            minWidth: '120px',
+        }}>
 
             <input
                 type="text"
@@ -61,10 +66,10 @@ const SearchBar = () => {
                         <div
                             onClick={() => navigate('/WorkoutSearchByCategory')}
                             style={{
-                                padding: '12px', 
-                                cursor: 'pointer', 
-                                display: 'flex', 
-                                alignItems: 'center', 
+                                padding: '12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
                                 gap: '10px',
                                 color: 'var(--accent)',
                                 fontWeight: '400',
