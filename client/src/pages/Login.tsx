@@ -5,26 +5,82 @@ interface LoginProps {
     setIsLoggedIn: (loggedIn: boolean) => void;
 }
 
-// New Login page component
 const Login = ({ setIsLoggedIn }: LoginProps) => {
-
     const navigate = useNavigate();
 
     const handleLogin = () => {
-        setIsLoggedIn(true); // Update the login state in the App component to true.
-        navigate('/'); // Redirect to the Home page after logging in.
+        setIsLoggedIn(true);
+        navigate('/');
+    }
+
+    const handleRegister = () => {
+        navigate('/register');
     }
 
     return (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-            <h1>Login Page</h1>
-            <p> Please log in to your account.</p>
+        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '40px' }}>
+            <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Login</h1>
+            
+            <div style={{ marginBottom: '20px' }}>
+                <label htmlFor="username" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                    Username
+                </label>
+                <input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
+                    }}
+                />
+            </div>
 
-            {/* Dummy Login Button to redirect to Home page */}
-            <Button label="Log In" variant="primary" onClick={handleLogin} />
+            <div style={{ marginBottom: '30px' }}>
+                <label htmlFor="password" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                    Password
+                </label>
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
+                    }}
+                />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+                <Button label="Login" variant="primary" onClick={handleLogin} />
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+                <p style={{ margin: '0', color: '#666' }}>
+                    Don't have an account?{' '}
+                    <a 
+                        onClick={handleRegister}
+                        style={{ 
+                            cursor: 'pointer', 
+                            color: '#007bff',
+                            textDecoration: 'none',
+                            fontWeight: '500'
+                        }}
+                    >
+                        Register here
+                    </a>
+                </p>
+            </div>
         </div>
     );
 };
 
-// Makes the file publicly available for the main App component to import and use
 export default Login;
