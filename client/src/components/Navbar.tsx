@@ -83,6 +83,9 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                         <Link to="/workout" style={{ textDecoration: 'none' }}>
                             <Button label="Workout" variant="secondary" onClick={() => { }} />
                         </Link>
+                        <Link to="/workout-history" style={{ textDecoration: 'none' }}>
+                            <Button label="History" variant="secondary" onClick={() => { }} />
+                        </Link>
 
                         <Button label="Logout" variant="danger" onClick={handleLogout} />
                     </>
