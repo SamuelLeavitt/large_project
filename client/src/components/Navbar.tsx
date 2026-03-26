@@ -45,10 +45,14 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                 flex: 1,
                 display: 'flex',
                 justifyContent: 'center',
-                padding: '0 20px'
+                padding: '0 20px',
+                minWidth: 0,
+                overflow: 'hidden'
             }}>
                 {isLoggedIn && (
-                    <SearchBar />
+                    <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'center'   }}>
+                        <SearchBar />
+                    </div>
                 )}
             </div>
 
@@ -58,7 +62,10 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
             <div style={{
                 display: 'flex',       // Align children horizontally
                 alignItems: 'center',  // Center them vertically
-                gap: '12px'
+                gap: '12px',
+                flexShrink: 0,        // Prevents the right side from shrinking when space is tight
+                whiteSpace: 'nowrap',    // Prevents the buttons from wrapping to the next line
+                minWidth: 'fit-content'     // Ensures the container only takes up as much space as needed
             }}>
                 {/* If isLoggedIn = true, show profile and logout links */}
                 {/* If isLoggedIn = false, show login and register links */}
