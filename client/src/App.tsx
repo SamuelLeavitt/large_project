@@ -12,7 +12,7 @@ import Register from './pages/Register';
 import Workout from './pages/Workout';
 import WorkoutHistory from './pages/WorkoutHistory';
 
-
+// test
 
 // Import Navbar
 import Navbar from './components/Navbar';
