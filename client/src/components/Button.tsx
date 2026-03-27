@@ -9,9 +9,10 @@ interface ButtonProps {
     onClick: () => void;
     variant?: ButtonTypes;
     fullWidth?: boolean;
+    disabled?: boolean;
 }
 
-const Button = ({ label, onClick, variant = 'primary', fullWidth = false }: ButtonProps) => {
+const Button = ({ label, onClick, variant = 'primary', fullWidth = false, disabled = false }: ButtonProps) => {
 
     // These are the base style for all buttons variants.
     const baseStyle: React.CSSProperties = {
@@ -46,7 +47,11 @@ const Button = ({ label, onClick, variant = 'primary', fullWidth = false }: Butt
     }
 
     return (
-        <button style={{ ...baseStyle, ...buttonVariantStyles[variant] }} onClick={onClick}>
+        <button
+            style={{ ...baseStyle, ...buttonVariantStyles[variant], opacity: disabled ? 0.6 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
+            onClick={disabled ? undefined : onClick}
+            disabled={disabled}
+        >
             {label}
         </button>
     );
