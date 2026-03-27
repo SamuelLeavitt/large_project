@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 
@@ -7,10 +8,39 @@ interface LoginProps {
 
 const Login = ({ setIsLoggedIn }: LoginProps) => {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = () => {
-        setIsLoggedIn(true);
-        navigate('/');
+    const handleLogin = async () => {
+        setError(null);
+        if (!email || !password) {
+            setError("Email and password are required.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data?.error || data?.message || "Login failed");
+                setLoading(false);
+                return;
+            }
+
+            if (data.token) localStorage.setItem("token", data.token);
+            setIsLoggedIn(true);
+            navigate('/');
+        } catch (err) {
+            setError("Network error during login.");
+        } finally {
+            setLoading(false);
+        }
     }
 
     const handleRegister = () => {
@@ -22,13 +52,15 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
             <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Login</h1>
             
             <div style={{ marginBottom: '20px' }}>
-                <label htmlFor="username" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                    Username
+                <label htmlFor="email" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                    Email
                 </label>
                 <input
-                    id="username"
-                    type="text"
-                    placeholder="Enter your username"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
                     style={{
                         width: '100%',
                         padding: '10px',
@@ -47,6 +79,8 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
                 <input
                     id="password"
                     type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     style={{
                         width: '100%',
@@ -59,8 +93,9 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
                 />
             </div>
 
+            {error && <div style={{ color: 'red', marginBottom: '12px' }}>{error}</div>}
             <div style={{ marginBottom: '20px' }}>
-                <Button label="Login" variant="primary" onClick={handleLogin} />
+                <Button label={loading ? "Logging in..." : "Login"} variant="primary" onClick={handleLogin} disabled={loading} />
             </div>
 
             <div style={{ textAlign: 'center' }}>
