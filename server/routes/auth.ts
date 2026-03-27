@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/User";
+import User, { IUser } from "../models/User";
 
 const router = express.Router();
 
@@ -30,7 +29,7 @@ router.post("/register", async (req: Request, res: Response) => {
     const user = new User({
       username,
       email,
-      password,
+      passwordHash: password,
     });
 
     await user.save();
@@ -57,7 +56,7 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
+    const passwordMatches = await (user as IUser).comparePassword(password);
 
     if (!passwordMatches) {
       return res.status(401).json({ error: "Invalid credentials." });
