@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:watch": "nodemon --watch src/components/Login.tsx --exec \"npm run build\""
   },
   "dependencies": {
+    "nodemon": "^3.1.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
