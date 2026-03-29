@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "tsx watch server.ts"
+    "dev": "tsx watch server.ts",
+    "import:exercises": "tsx scripts/importExercises.ts"
   },
   "keywords": [],
   "author": "",
