@@ -1,21 +1,25 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import jwt from "jsonwebtoken";
-import User, { IUser } from "../models/User";
+import User from "../models/User.js";
 
 const router = express.Router();
 
-// Type for JWT payload
-interface JwtPayload {
-  userId: string;
-  email: string;
-}
-
-router.post("/register", async (req: Request, res: Response) => {
+router.post("/register", async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const rawUsername = String(req.body?.username ?? "");
+    const rawEmail = String(req.body?.email ?? "");
+    const rawPassword = String(req.body?.password ?? "");
+
+    const username = rawUsername.trim();
+    const email = rawEmail.trim().toLowerCase();
+    const password = rawPassword;
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters." });
     }
 
     const existingUser = await User.findOne({
@@ -34,17 +38,43 @@ router.post("/register", async (req: Request, res: Response) => {
 
     await user.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully.",
     });
-  } catch (error) {
-    res.status(500).json({ error: "Server error during registration." });
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === 11000
+    ) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "ValidationError"
+    ) {
+      return res.status(400).json({ message: "Invalid user data" });
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Unknown server error";
+
+    console.error("Register error:", message);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const rawEmail = String(req.body?.email ?? "");
+    const rawPassword = String(req.body?.password ?? "");
+
+    const email = rawEmail.trim().toLowerCase();
+    const password = rawPassword;
 
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required." });
@@ -56,10 +86,16 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
-    const passwordMatches = await (user as IUser).comparePassword(password);
+    const passwordMatches = await user.comparePassword(password);
 
     if (!passwordMatches) {
       return res.status(401).json({ error: "Invalid credentials." });
+    }
+
+    // Upgrade legacy plain-text password rows to bcrypt hash after successful login.
+    if (typeof user.passwordHash === "string" && !user.passwordHash.startsWith("$2")) {
+      user.passwordHash = password;
+      await user.save();
     }
 
     const token = jwt.sign(
@@ -68,7 +104,7 @@ router.post("/login", async (req: Request, res: Response) => {
       { expiresIn: "1h" }
     );
 
-    res.json({
+    return res.json({
       message: "Login successful.",
       token,
       user: {
@@ -77,13 +113,17 @@ router.post("/login", async (req: Request, res: Response) => {
         email: user.email,
       },
     });
-  } catch (error) {
-    res.status(500).json({ error: "Server error during login." });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Unknown server error";
+
+    console.error("Login error:", message);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
-router.post("/logout", (req: Request, res: Response) => {
-  res.json({ message: "Logout handled client-side by removing the token." });
+router.post("/logout", (req, res) => {
+  return res.json({ message: "Logout handled client-side by removing the token." });
 });
 
 export default router;
