@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Exercise from "../models/Exercise";
+import Exercise from "../models/Exercise.js";
 
 dotenv.config();
 
