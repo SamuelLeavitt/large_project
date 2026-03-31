@@ -1,11 +1,13 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "seed": "node ./scripts/seedUsers.js"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch server.ts",
+    "import:exercises": "tsx scripts/importExercises.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,5 +22,15 @@
     "mongoose": "^9.3.0",
     "prompt-sync": "^4.2.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.5.0",
+    "@types/prompt-sync": "^4.2.3",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
 }
