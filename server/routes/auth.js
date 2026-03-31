@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
 const router = express.Router();
@@ -30,10 +31,12 @@ router.post("/register", async (req, res) => {
       return res.status(409).json({ error: "Username or email already exists." });
     }
 
+    const hashed = await bcrypt.hash(password, 10);
+
     const user = new User({
       username,
       email,
-      passwordHash: password,
+      passwordHash: hashed,
     });
 
     await user.save();
@@ -80,7 +83,8 @@ router.post("/login", async (req, res) => {
 
     // Upgrade legacy plain-text password rows to bcrypt hash after successful login.
     if (typeof user.passwordHash === "string" && !user.passwordHash.startsWith("$2")) {
-      user.passwordHash = password;
+      // Legacy non-bcrypt password stored; replace with bcrypt hash
+      user.passwordHash = await bcrypt.hash(password, 10);
       await user.save();
     }
 
