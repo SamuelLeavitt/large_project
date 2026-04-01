@@ -92,12 +92,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
-    // Upgrade legacy plain-text password rows to bcrypt hash after successful login.
-    if (typeof user.passwordHash === "string" && !user.passwordHash.startsWith("$2")) {
-      user.passwordHash = password;
-      await user.save();
-    }
-
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET || "dev_secret_change_me",
