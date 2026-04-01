@@ -13,6 +13,7 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    // means TypeScript is not writing JS files to disk here, but instead just checking types and letting Vite handle the actual bundling and output
     "noEmit": true,
     "jsx": "react-jsx",
 
