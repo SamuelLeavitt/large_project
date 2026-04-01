@@ -10,15 +10,42 @@ export interface WorkoutSet {
   reps: number;
 }
 
+//This storage key is for TEMPORARY workout history saved from the frontend.
+//Later the workout history will come from the backend per logged-in user.
+const HISTORY_STORAGE_KEY = "temporary_workout_history";
+
+//Reads workout history entries that were temporarily saved from the Workout page.
+function getStoredWorkoutHistory(): Workout[] {
+  const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+//Saves new workout history rows into localStorage just to test the frontend work for now.
+export function appendWorkoutHistory(workouts: Workout[]): void {
+  const current = getStoredWorkoutHistory();
+  const updated = [...workouts, ...current];
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+}
+
 // temporarily replaces actual API call to fetch distinct exercise names from database, use mock data for now
 export function getAllExercises(): string[] {
-  return [...new Set(MOCK_DATA.map((w) => w.exercise))];
+  const combined = [...MOCK_DATA, ...getStoredWorkoutHistory()];
+  return [...new Set(combined.map((w) => w.exercise))];
 }
 
 // temporarily replaces actual API call to fetch workouts from database, use mock data for now
 export async function getWorkouts(exercise?: string): Promise<Workout[]> {
   await new Promise((r) => setTimeout(r, 200));
-  return exercise ? MOCK_DATA.filter((w) => w.exercise === exercise) : MOCK_DATA;
+  const combined = [...getStoredWorkoutHistory(), ...MOCK_DATA];
+  return exercise ? combined.filter((w) => w.exercise === exercise) : combined;
 }
 
 // helper functions to calculate max weight for a given workout
