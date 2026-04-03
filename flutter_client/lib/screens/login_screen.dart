@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
@@ -9,84 +10,195 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final email = TextEditingController();
-  final password = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   bool loading = false;
   String? error;
 
   Future<void> loginUser() async {
-    setState(() => error = null);
+    FocusScope.of(context).unfocus();
 
-    if (email.text.isEmpty || password.text.isEmpty) {
-      setState(() => error = "Email and password are required.");
+    setState(() {
+      error = null;
+    });
+
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        error = 'Email and password are required.';
+      });
       return;
     }
 
-    setState(() => loading = true);
+    setState(() {
+      loading = true;
+    });
 
     try {
-      final res = await AuthService.login(email.text, password.text);
-
-      debugPrint("TOKEN: ${res['token']}");
+      await AuthService.login(email, password);
 
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Login success")));
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      setState(() => error = e.toString().replaceFirst("Exception: ", ""));
+      setState(() {
+        error = e.toString().replaceFirst('Exception: ', '');
+      });
     } finally {
-      setState(() => loading = false);
+      if (!mounted) return;
+      setState(() {
+        loading = false;
+      });
     }
+  }
+
+  InputDecoration inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(
+        fontSize: 14,
+        color: Color(0xFF999999),
+      ),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      filled: true,
+      fillColor: Colors.white,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4),
+        borderSide: const BorderSide(color: Color(0xFFCCCCCC), width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4),
+        borderSide: const BorderSide(color: Color(0xFFCCCCCC), width: 1),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4),
+        borderSide: const BorderSide(color: Color(0xFFCCCCCC), width: 1),
+      ),
+    );
+  }
+
+  Widget fieldLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Login", style: TextStyle(fontSize: 28)),
-              const SizedBox(height: 30),
-
-              TextField(
-                controller: email,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextField(
-                controller: password,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "Password"),
-              ),
-
-              const SizedBox(height: 20),
-
-              if (error != null)
-                Text(error!, style: const TextStyle(color: Colors.red)),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: loading ? null : loginUser,
-                child: Text(loading ? "Logging in..." : "Login"),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/register'),
-                child: const Text("Register here"),
-              )
-            ],
+        child: SingleChildScrollView(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.all(40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  'Login',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                fieldLabel('Email'),
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: inputDecoration('Enter your email'),
+                ),
+                const SizedBox(height: 20),
+                fieldLabel('Password'),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: inputDecoration('Enter your password'),
+                ),
+                const SizedBox(height: 30),
+                if (error != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      error!,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                    ),
+                  ),
+                ],
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: loading ? null : loginUser,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: const Color(0xFF007BFF),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor:
+                          const Color(0xFF007BFF).withAlpha(179),
+                      disabledForegroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: Text(loading ? 'Logging in...' : 'Login'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF666666),
+                      ),
+                      children: [
+                        const TextSpan(text: "Don't have an account? "),
+                        TextSpan(
+                          text: 'Register here',
+                          style: const TextStyle(
+                            color: Color(0xFF007BFF),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, '/register');
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
