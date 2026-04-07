@@ -78,13 +78,60 @@ const fixedSavedWorkoutsListStyle: React.CSSProperties = {
   paddingRight: "6px",
 };
 
+//This is a note: these are the limited mobile-friendly boxes used by Quick Start.
+const fixedQuickStartExerciseListStyle: React.CSSProperties = {
+  border: "1px solid var(--border)",
+  borderRadius: "14px",
+  padding: "12px",
+  background: "var(--bg)",
+  minHeight: "260px",
+  maxHeight: "360px",
+  overflowY: "auto",
+};
+
+const fixedQuickStartLoggedSetsStyle: React.CSSProperties = {
+  border: "1px solid var(--border)",
+  borderRadius: "14px",
+  padding: "12px",
+  background: "var(--bg)",
+  minHeight: "180px",
+  maxHeight: "220px",
+  overflowY: "auto",
+};
+
+
+//This is a note: these fixed boxes keep the active saved-workout page easier to use on mobile.
+const fixedActiveWorkoutHeaderStyle: React.CSSProperties = {
+  minHeight: "120px",
+  maxHeight: "160px",
+  overflowY: "auto",
+};
+
+const fixedActiveWorkoutLoggedSetsStyle: React.CSSProperties = {
+  border: "1px solid var(--border)",
+  borderRadius: "14px",
+  padding: "12px",
+  background: "var(--bg)",
+  minHeight: "180px",
+  maxHeight: "240px",
+  overflowY: "auto",
+};
+
 type ViewMode = "saved" | "quickStart" | "browse";
-type BuilderStep = "hidden" | "name" | "builder" | "exercisePicker";
+type BuilderStep =
+  | "hidden"
+  | "name"
+  | "builder"
+  | "exercisePicker"
+  | "quickStartBuilder"
+  | "quickStartExercisePicker"
+  | "quickStartFinishQuestion"
+  | "quickStartSaveName";
 
 const Workout = () => {
   //Top-level page mode.
   //"saved" = manage saved workout plans
-  //"quickStart" = placeholder tab for the quick start flow that will be built later
+  //"quickStart" = quick workout flow that starts blank
   //"browse" = browse all available exercises
   const [viewMode, setViewMode] = useState<ViewMode>("saved");
 
@@ -101,6 +148,9 @@ const Workout = () => {
 
   //Search box used only on the Add Exercise page.
   const [builderSearch, setBuilderSearch] = useState("");
+
+  //Search box used only on the Quick Start Add Exercise page.
+  const [quickStartSearch, setQuickStartSearch] = useState("");
 
   //Controls the create workout flow.
   //The flow is split into dedicated full-page views:
@@ -122,6 +172,16 @@ const Workout = () => {
   const [activeLogs, setActiveLogs] = useState<ActiveExerciseLog[]>([]);
   const [weightInput, setWeightInput] = useState("");
   const [repsInput, setRepsInput] = useState("");
+
+  //Quick Start state.
+  //This is a note: Quick Start acts like a blank temporary workout that can optionally be saved as a plan at the end.
+  const [quickStartExercises, setQuickStartExercises] = useState<WorkoutExercise[]>([]);
+  const [quickStartLogs, setQuickStartLogs] = useState<ActiveExerciseLog[]>([]);
+  const [quickStartExerciseIndex, setQuickStartExerciseIndex] = useState(0);
+
+  //This is a note: these states control the Quick Start finish flow pages instead of using popup windows.
+  const [quickStartShouldSavePlan, setQuickStartShouldSavePlan] = useState(false);
+  const [quickStartPlanName, setQuickStartPlanName] = useState("");
 
   //Stopwatch state for active workouts.
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -196,6 +256,26 @@ const Workout = () => {
       );
     });
   }, [allExercises, selectedZone, builderSearch]);
+
+  //This is a note: Quick Start uses its own picker search but keeps the same body zone buttons.
+  const quickStartZoneExercises = useMemo(() => {
+    const lowered = quickStartSearch.trim().toLowerCase();
+
+    return allExercises.filter((exercise) => {
+      const matchesZone =
+        (exercise.bodyPart || "").toLowerCase() === selectedZone.toLowerCase();
+
+      if (!matchesZone) return false;
+      if (!lowered) return true;
+
+      return (
+        exercise.name.toLowerCase().includes(lowered) ||
+        (exercise.category || "").toLowerCase().includes(lowered) ||
+        (exercise.bodyPart || "").toLowerCase().includes(lowered) ||
+        (exercise.equipment || "").toLowerCase().includes(lowered)
+      );
+    });
+  }, [allExercises, quickStartSearch, selectedZone]);
 
   const addExerciseToWorkoutPlan = (exercise: Exercise) => {
     const exerciseId =
@@ -303,12 +383,16 @@ const Workout = () => {
     setSavedWorkouts(getSavedWorkouts());
   };
 
+  const resetWorkoutInputs = () => {
+    setWeightInput("");
+    setRepsInput("");
+  };
+
   //Starts a saved workout plan and switches the page into active workout mode.
   const handleStartWorkout = (workout: SavedWorkout) => {
     setActiveWorkout(workout);
     setActiveExerciseIndex(0);
-    setWeightInput("");
-    setRepsInput("");
+    resetWorkoutInputs();
     setElapsedSeconds(0);
     setIsStopwatchRunning(false);
 
@@ -337,8 +421,7 @@ const Workout = () => {
       )
     );
 
-    setWeightInput("");
-    setRepsInput("");
+    resetWorkoutInputs();
   };
 
   const activeExercise = activeWorkout?.exercises[activeExerciseIndex] || null;
@@ -347,8 +430,7 @@ const Workout = () => {
   const handlePreviousExercise = () => {
     if (activeExerciseIndex === 0) return;
     setActiveExerciseIndex((prev) => prev - 1);
-    setWeightInput("");
-    setRepsInput("");
+    resetWorkoutInputs();
   };
 
   const handleNextExercise = () => {
@@ -356,8 +438,16 @@ const Workout = () => {
     if (activeExerciseIndex >= activeWorkout.exercises.length - 1) return;
 
     setActiveExerciseIndex((prev) => prev + 1);
-    setWeightInput("");
-    setRepsInput("");
+    resetWorkoutInputs();
+  };
+
+  const exitActiveWorkout = () => {
+    setActiveWorkout(null);
+    setActiveExerciseIndex(0);
+    setActiveLogs([]);
+    resetWorkoutInputs();
+    setElapsedSeconds(0);
+    setIsStopwatchRunning(false);
   };
 
   //Saves the completed active workout into temporary Workout History storage.
@@ -381,13 +471,184 @@ const Workout = () => {
       appendWorkoutHistory(historyRows);
     }
 
-    setActiveWorkout(null);
-    setActiveExerciseIndex(0);
-    setActiveLogs([]);
-    setWeightInput("");
-    setRepsInput("");
+    exitActiveWorkout();
+  };
+
+  //QUICK START HELPERS
+  const resetQuickStartFlow = () => {
+    setQuickStartExercises([]);
+    setQuickStartLogs([]);
+    setQuickStartExerciseIndex(0);
+    setQuickStartSearch("");
+    setSelectedZone("Upper Body");
+    setBuilderStep("hidden");
+    setQuickStartShouldSavePlan(false);
+    setQuickStartPlanName("");
+    resetWorkoutInputs();
     setElapsedSeconds(0);
     setIsStopwatchRunning(false);
+  };
+
+  const handleStartBlankQuickStart = () => {
+    setQuickStartExercises([]);
+    setQuickStartLogs([]);
+    setQuickStartExerciseIndex(0);
+    setQuickStartSearch("");
+    setSelectedZone("Upper Body");
+    setBuilderStep("quickStartBuilder");
+    resetWorkoutInputs();
+    setElapsedSeconds(0);
+    setIsStopwatchRunning(false);
+  };
+
+  const handleOpenQuickStartExercisePicker = () => {
+    setQuickStartSearch("");
+    setBuilderStep("quickStartExercisePicker");
+  };
+
+  const addExerciseToQuickStart = (exercise: Exercise) => {
+    const exerciseId =
+      exercise._id || exercise.id || exercise.datasetId || exercise.name;
+
+    const alreadyAddedIndex = quickStartExercises.findIndex(
+      (item) => item.exerciseId === exerciseId
+    );
+
+    if (alreadyAddedIndex !== -1) {
+      setQuickStartExerciseIndex(alreadyAddedIndex);
+      setBuilderStep("quickStartBuilder");
+      return;
+    }
+
+    const newExercise: WorkoutExercise = {
+      exerciseId,
+      name: exercise.name,
+      category: exercise.category,
+      bodyPart: exercise.bodyPart,
+      sets: 3,
+      reps: "10",
+    };
+
+    const newLog: ActiveExerciseLog = {
+      exerciseId,
+      name: exercise.name,
+      sets: [],
+    };
+
+    setQuickStartExercises((prev) => {
+      const updated = [...prev, newExercise];
+      setQuickStartExerciseIndex(updated.length - 1);
+      return updated;
+    });
+    setQuickStartLogs((prev) => [...prev, newLog]);
+    setBuilderStep("quickStartBuilder");
+  };
+
+  const updateQuickStartExercise = (
+    index: number,
+    field: keyof WorkoutExercise,
+    value: string | number
+  ) => {
+    setQuickStartExercises((prev) =>
+      prev.map((exercise, i) =>
+        i === index ? { ...exercise, [field]: value } : exercise
+      )
+    );
+  };
+
+  const removeQuickStartExercise = (index: number) => {
+    setQuickStartExercises((prev) => prev.filter((_, i) => i !== index));
+    setQuickStartLogs((prev) => prev.filter((_, i) => i !== index));
+    setQuickStartExerciseIndex((prev) => {
+      if (index === 0 && quickStartExercises.length <= 1) return 0;
+      if (prev > index) return prev - 1;
+      if (prev >= quickStartExercises.length - 1) {
+        return Math.max(quickStartExercises.length - 2, 0);
+      }
+      return prev;
+    });
+    resetWorkoutInputs();
+  };
+
+  const handleAddSetToQuickStartExercise = () => {
+    if (quickStartExercises.length === 0 || !weightInput || !repsInput) return;
+
+    const newSet: LoggedSet = {
+      weight: Number(weightInput),
+      reps: Number(repsInput),
+    };
+
+    setQuickStartLogs((prev) =>
+      prev.map((exercise, index) =>
+        index === quickStartExerciseIndex
+          ? { ...exercise, sets: [...exercise.sets, newSet] }
+          : exercise
+      )
+    );
+
+    resetWorkoutInputs();
+  };
+
+  const saveQuickStartToHistory = () => {
+    if (quickStartExercises.length === 0) return;
+
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const time = now.toTimeString().slice(0, 5);
+
+    const historyRows = quickStartLogs
+      .filter((exercise) => exercise.sets.length > 0)
+      .map((exercise) => ({
+        date,
+        time,
+        exercise: exercise.name,
+        sets: exercise.sets,
+      }));
+
+    if (historyRows.length > 0) {
+      appendWorkoutHistory(historyRows);
+    }
+  };
+
+  const finishQuickStartAndReturn = () => {
+    resetQuickStartFlow();
+    setQuickStartShouldSavePlan(false);
+    setQuickStartPlanName("");
+    setViewMode("quickStart");
+  };
+
+  const handleSaveQuickStartAsPlan = () => {
+    const trimmedName = quickStartPlanName.trim();
+
+    if (!trimmedName || quickStartExercises.length === 0) return;
+
+    const newWorkout: SavedWorkout = {
+      id: crypto.randomUUID(),
+      name: trimmedName,
+      bodyPart:
+        quickStartExercises.length === 1
+          ? quickStartExercises[0].bodyPart || "Custom"
+          : "Custom",
+      createdAt: new Date().toISOString(),
+      exercises: quickStartExercises,
+    };
+
+    saveWorkout(newWorkout);
+    setSavedWorkouts(getSavedWorkouts());
+
+    finishQuickStartAndReturn();
+  };
+
+  const handleFinishQuickStartWorkout = () => {
+    if (quickStartExercises.length === 0) return;
+
+    //This is a note: save the completed session to temporary workout history first.
+    saveQuickStartToHistory();
+
+    //This is a note: move to a dedicated page instead of using popup questions.
+    setQuickStartShouldSavePlan(false);
+    setQuickStartPlanName("Quick Start Workout");
+    setBuilderStep("quickStartFinishQuestion");
   };
 
   const formatStopwatch = (totalSeconds: number) => {
@@ -396,6 +657,9 @@ const Workout = () => {
 
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
+
+  const quickStartCurrentExercise = quickStartExercises[quickStartExerciseIndex] || null;
+  const quickStartCurrentLog = quickStartLogs[quickStartExerciseIndex];
 
   //ACTIVE WORKOUT VIEW
   if (activeWorkout && activeExercise) {
@@ -412,7 +676,7 @@ const Workout = () => {
           gap: "24px",
         }}
       >
-        <div style={sectionStyle}>
+        <div style={{ ...sectionStyle, ...fixedActiveWorkoutHeaderStyle }}>
           <div
             style={{
               display: "flex",
@@ -423,7 +687,7 @@ const Workout = () => {
             }}
           >
             <div style={{ minWidth: 0, flex: 1 }}>
-              <h1 style={{ marginBottom: "8px", wordBreak: "break-word" }}>
+              <h1 style={{ marginBottom: "16px", wordBreak: "break-word" }}>
                 {activeWorkout.name}
               </h1>
               <p>
@@ -434,15 +698,7 @@ const Workout = () => {
             <Button
               label="Exit Workout"
               variant="danger"
-              onClick={() => {
-                setActiveWorkout(null);
-                setActiveExerciseIndex(0);
-                setActiveLogs([]);
-                setWeightInput("");
-                setRepsInput("");
-                setElapsedSeconds(0);
-                setIsStopwatchRunning(false);
-              }}
+              onClick={exitActiveWorkout}
             />
           </div>
         </div>
@@ -494,11 +750,12 @@ const Workout = () => {
 
           <div style={{ marginTop: "20px" }}>
             <h3>Logged Sets</h3>
-            {!activeExerciseLog || activeExerciseLog.sets.length === 0 ? (
-              <p>No sets logged yet.</p>
-            ) : (
-              <div style={{ display: "grid", gap: "10px", marginTop: "12px" }}>
-                {activeExerciseLog.sets.map((set, index) => (
+            <div style={{ ...fixedActiveWorkoutLoggedSetsStyle, marginTop: "12px" }}>
+              {!activeExerciseLog || activeExerciseLog.sets.length === 0 ? (
+                <p style={{ margin: 0 }}>No sets logged yet.</p>
+              ) : (
+                <div style={{ display: "grid", gap: "10px" }}>
+                  {activeExerciseLog.sets.map((set, index) => (
                   <div
                     key={index}
                     style={{
@@ -513,6 +770,7 @@ const Workout = () => {
                 ))}
               </div>
             )}
+            </div>
           </div>
         </div>
 
@@ -640,7 +898,7 @@ const Workout = () => {
         }}
       >
         <div>
-          <h1 style={{ marginBottom: "8px", wordBreak: "break-word" }}>
+          <h1 style={{ marginBottom: "16px", wordBreak: "break-word" }}>
             {workoutName}
           </h1>
           <p>
@@ -887,6 +1145,549 @@ const Workout = () => {
     );
   }
 
+  //QUICK START WORKOUT BUILDER PAGE
+  if (builderStep === "quickStartBuilder") {
+    return (
+      <div
+        style={{
+          maxWidth: "980px",
+          margin: "0 auto",
+          padding: "24px",
+          display: "grid",
+          gap: "24px",
+        }}
+      >
+        <div style={sectionStyle}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "12px",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h1 style={{ marginBottom: "16px", wordBreak: "break-word" }}>
+                Quick Start Workout
+              </h1>
+              <p>
+                Start from blank, add exercises, log sets as you go, then finish and save it.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Button
+                label="Finish Workout"
+                variant="primary"
+                onClick={handleFinishQuickStartWorkout}
+                disabled={quickStartExercises.length === 0}
+              />
+              <Button
+                label="Cancel"
+                variant="secondary"
+                onClick={resetQuickStartFlow}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div style={sectionStyle}>
+          <h2>Stopwatch</h2>
+          <p style={{ fontSize: "32px", fontWeight: 700, margin: "10px 0 18px 0" }}>
+            {formatStopwatch(elapsedSeconds)}
+          </p>
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <Button
+              label={isStopwatchRunning ? "Pause" : "Start"}
+              variant="primary"
+              onClick={() => setIsStopwatchRunning((prev) => !prev)}
+            />
+            <Button
+              label="Reset"
+              variant="secondary"
+              onClick={() => {
+                setElapsedSeconds(0);
+                setIsStopwatchRunning(false);
+              }}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(280px, 360px) minmax(0, 1fr)",
+            gap: "24px",
+          }}
+        >
+          <div style={sectionStyle}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "10px",
+                flexWrap: "wrap",
+                alignItems: "center",
+                marginBottom: "14px",
+              }}
+            >
+              <h2 style={{ margin: 0 }}>Exercises</h2>
+              <Button
+                label="Add Exercise"
+                variant="primary"
+                onClick={handleOpenQuickStartExercisePicker}
+              />
+            </div>
+
+            <div style={fixedQuickStartExerciseListStyle}>
+              {quickStartExercises.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  No exercises added yet. Tap Add Exercise to start building this workout.
+                </p>
+              ) : (
+                <div style={{ display: "grid", gap: "10px" }}>
+                  {quickStartExercises.map((exercise, index) => {
+                    const completedSets = quickStartLogs[index]?.sets.length || 0;
+                    const isSelected = index === quickStartExerciseIndex;
+
+                    return (
+                      <button
+                        key={`${exercise.exerciseId}-${index}`}
+                        type="button"
+                        onClick={() => {
+                          setQuickStartExerciseIndex(index);
+                          resetWorkoutInputs();
+                        }}
+                        style={{
+                          textAlign: "left",
+                          border: isSelected
+                            ? "1px solid var(--accent-border)"
+                            : "1px solid var(--border)",
+                          borderRadius: "12px",
+                          padding: "12px",
+                          background: isSelected ? "var(--social-bg)" : "var(--bg)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "10px",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <strong style={{ display: "block", wordBreak: "break-word" }}>
+                              {exercise.name}
+                            </strong>
+                            <p style={{ margin: "6px 0 0 0" }}>
+                              {exercise.sets} target sets × {exercise.reps} reps
+                            </p>
+                            <p style={{ margin: "6px 0 0 0" }}>
+                              Logged sets: {completedSets}
+                            </p>
+                          </div>
+
+                          <div onClick={(event) => event.stopPropagation()}>
+                            <Button
+                              label="Remove"
+                              variant="danger"
+                              onClick={() => removeQuickStartExercise(index)}
+                            />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={sectionStyle}>
+            {!quickStartCurrentExercise ? (
+              <div style={{ display: "grid", gap: "14px" }}>
+                <h2 style={{ margin: 0 }}>Current Exercise</h2>
+                <p style={{ margin: 0 }}>
+                  Add an exercise first, then you can update target sets and reps and log each set here.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gap: "16px" }}>
+                <div>
+                  <h2 style={{ margin: "0 0 8px 0", wordBreak: "break-word" }}>
+                    {quickStartCurrentExercise.name}
+                  </h2>
+                  <p style={{ margin: 0 }}>
+                    Exercise {quickStartExerciseIndex + 1} of {quickStartExercises.length}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
+                  <div>
+                    <label style={{ display: "block", marginBottom: "6px" }}>
+                      Target Sets
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={quickStartCurrentExercise.sets}
+                      onChange={(e) =>
+                        updateQuickStartExercise(
+                          quickStartExerciseIndex,
+                          "sets",
+                          Number(e.target.value)
+                        )
+                      }
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", marginBottom: "6px" }}>
+                      Target Reps
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="8-10"
+                      value={quickStartCurrentExercise.reps}
+                      onChange={(e) =>
+                        updateQuickStartExercise(
+                          quickStartExerciseIndex,
+                          "reps",
+                          e.target.value
+                        )
+                      }
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
+                  <div>
+                    <label style={{ display: "block", marginBottom: "6px" }}>
+                      Weight
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Enter weight"
+                      value={weightInput}
+                      onChange={(e) => setWeightInput(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", marginBottom: "6px" }}>
+                      Reps
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Enter reps"
+                      value={repsInput}
+                      onChange={(e) => setRepsInput(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <Button
+                    label="Add Set"
+                    variant="primary"
+                    onClick={handleAddSetToQuickStartExercise}
+                  />
+                  <Button
+                    label="Previous"
+                    variant="secondary"
+                    onClick={() => {
+                      if (quickStartExerciseIndex === 0) return;
+                      setQuickStartExerciseIndex((prev) => prev - 1);
+                      resetWorkoutInputs();
+                    }}
+                    disabled={quickStartExerciseIndex === 0}
+                  />
+                  <Button
+                    label="Next"
+                    variant="secondary"
+                    onClick={() => {
+                      if (quickStartExerciseIndex >= quickStartExercises.length - 1) return;
+                      setQuickStartExerciseIndex((prev) => prev + 1);
+                      resetWorkoutInputs();
+                    }}
+                    disabled={quickStartExerciseIndex >= quickStartExercises.length - 1}
+                  />
+                </div>
+
+                <div>
+                  <h3 style={{ marginTop: 0 }}>Logged Sets</h3>
+                  <div style={fixedQuickStartLoggedSetsStyle}>
+                    {!quickStartCurrentLog || quickStartCurrentLog.sets.length === 0 ? (
+                      <p style={{ margin: 0 }}>No sets logged yet.</p>
+                    ) : (
+                      <div style={{ display: "grid", gap: "10px" }}>
+                        {quickStartCurrentLog.sets.map((set, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              padding: "12px",
+                              borderRadius: "10px",
+                              border: "1px solid var(--border)",
+                              background: "var(--social-bg)",
+                            }}
+                          >
+                            Set {index + 1}: {set.weight} lbs × {set.reps} reps
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  //QUICK START ADD EXERCISE PAGE
+  if (builderStep === "quickStartExercisePicker") {
+    return (
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "0 auto",
+          padding: "24px",
+          display: "grid",
+          gap: "24px",
+        }}
+      >
+        <div>
+          <h1>Add Exercise</h1>
+          <p>
+            Choose a body zone or search for exercises to add to your Quick Start workout.
+          </p>
+        </div>
+
+        <div style={sectionStyle}>
+          <div style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <h3 style={{ marginBottom: "10px" }}>Choose a Body Zone</h3>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {zoneOptions.map((zone) => (
+                  <button
+                    key={zone}
+                    type="button"
+                    style={tabButtonStyle(selectedZone === zone)}
+                    onClick={() => handleSelectZone(zone)}
+                  >
+                    {zone}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <input
+                type="text"
+                placeholder="Search exercises"
+                value={quickStartSearch}
+                onChange={(e) => setQuickStartSearch(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={fixedExercisePickerBoxStyle}>
+              {loadingExercises ? (
+                <p>Loading exercises...</p>
+              ) : quickStartZoneExercises.length === 0 ? (
+                <p>No exercises found in this body zone.</p>
+              ) : (
+                <div style={{ display: "grid", gap: "10px" }}>
+                  {quickStartZoneExercises.map((exercise) => {
+                    const alreadyAdded = quickStartExercises.some(
+                      (item) =>
+                        item.exerciseId ===
+                        (exercise._id || exercise.id || exercise.datasetId || exercise.name)
+                    );
+
+                    return (
+                      <div
+                        key={exercise._id || exercise.id || exercise.datasetId || exercise.name}
+                        style={{
+                          border: "1px solid var(--border)",
+                          borderRadius: "12px",
+                          padding: "12px",
+                          background: "var(--social-bg)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "10px",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                          }}
+                        >
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <h3 style={{ margin: "0 0 8px 0", wordBreak: "break-word" }}>
+                              {exercise.name}
+                            </h3>
+                            <p style={{ margin: "0 0 4px 0" }}>
+                              <strong>Body Area:</strong> {exercise.bodyPart || "N/A"}
+                            </p>
+                            <p style={{ margin: 0 }}>
+                              <strong>Equipment:</strong> {exercise.equipment || "N/A"}
+                            </p>
+                          </div>
+
+                          <Button
+                            label={alreadyAdded ? "Added" : "Add"}
+                            variant="primary"
+                            onClick={() => addExerciseToQuickStart(exercise)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Button
+                label="Back to Quick Start"
+                variant="secondary"
+                onClick={() => setBuilderStep("quickStartBuilder")}
+              />
+              <Button
+                label="Cancel Quick Start"
+                variant="secondary"
+                onClick={resetQuickStartFlow}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  //QUICK START FINISH QUESTION PAGE
+  if (builderStep === "quickStartFinishQuestion") {
+    return (
+      <div
+        style={{
+          maxWidth: "820px",
+          margin: "0 auto",
+          padding: "24px",
+          display: "grid",
+          gap: "24px",
+        }}
+      >
+        <div>
+          <h1>Workout Finished</h1>
+          <p>
+            Your Quick Start workout was saved to Workout History. Do you also want
+            to save it as a workout plan?
+          </p>
+        </div>
+
+        <div style={sectionStyle}>
+          <div style={{ display: "grid", gap: "18px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Button
+                label="Yes, Save as Plan"
+                variant="primary"
+                onClick={() => {
+                  setQuickStartShouldSavePlan(true);
+                  setBuilderStep("quickStartSaveName");
+                }}
+              />
+              <Button
+                label="No, Finish"
+                variant="secondary"
+                onClick={finishQuickStartAndReturn}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  //QUICK START SAVE NAME PAGE
+  if (builderStep === "quickStartSaveName") {
+    return (
+      <div
+        style={{
+          maxWidth: "820px",
+          margin: "0 auto",
+          padding: "24px",
+          display: "grid",
+          gap: "24px",
+        }}
+      >
+        <div>
+          <h1>Save Quick Start Workout</h1>
+          <p>
+            {quickStartShouldSavePlan
+              ? "Enter a name for this workout plan so you can use it again later."
+              : "Enter a name for this workout plan."}
+          </p>
+        </div>
+
+        <div style={sectionStyle}>
+          <div style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "6px" }}>
+                Workout Name
+              </label>
+              <input
+                type="text"
+                placeholder="Example: Quick Push Day"
+                value={quickStartPlanName}
+                onChange={(e) => setQuickStartPlanName(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Button
+                label="Save Workout Plan"
+                variant="primary"
+                onClick={handleSaveQuickStartAsPlan}
+                disabled={!quickStartPlanName.trim()}
+              />
+              <Button
+                label="Back"
+                variant="secondary"
+                onClick={() => setBuilderStep("quickStartFinishQuestion")}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   //NORMAL PAGE VIEW (Including Saved Page, Quick Start Page, and Browse Page)
   return (
     <div
@@ -934,10 +1735,40 @@ const Workout = () => {
 
       {viewMode === "quickStart" && (
         <div style={sectionStyle}>
-          <h2>Quick Start</h2>
-          <p>
-            Soon the be Quick Start function.
-          </p>
+          <div style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <h2>Quick Start</h2>
+              <p>
+                Start a blank workout, add exercises on the fly, log your sets, then finish and save it.
+              </p>
+            </div>
+
+            <div style={fixedQuickStartExerciseListStyle}>
+              <div style={{ display: "grid", gap: "12px" }}>
+                <div
+                  style={{
+                    border: "1px solid var(--border)",
+                    borderRadius: "12px",
+                    padding: "14px",
+                    background: "var(--bg)",
+                  }}
+                >
+                  <h3 style={{ marginTop: 0 }}>Blank Workout</h3>
+                  <p style={{ marginBottom: 0 }}>
+                    This starts an empty workout session. Add each exercise as you go, log your weight and reps, then finish when you are done.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Button
+                label="Start Blank Workout"
+                variant="primary"
+                onClick={handleStartBlankQuickStart}
+              />
+            </div>
+          </div>
         </div>
       )}
 

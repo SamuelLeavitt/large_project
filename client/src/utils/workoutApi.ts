@@ -2,6 +2,9 @@ import type { Exercise } from "./workoutTypes";
 
 //This file is the temporary frontend API layer for exercises.
 
+//This is a note: set this to false when i want to test frontend without the backend running.
+const USE_BACKEND = false;
+
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -147,10 +150,24 @@ const MOCK_EXERCISES: Exercise[] = [
 ];
 
 export async function getExercises(search = ""): Promise<Exercise[]> {
+  const lowered = search.trim().toLowerCase();
+
+  //This is a note: this lets the frontend work by itself during temporary testing.
+  if (!USE_BACKEND) {
+    if (!lowered) return MOCK_EXERCISES;
+
+    return MOCK_EXERCISES.filter((exercise) => {
+      return (
+        exercise.name.toLowerCase().includes(lowered) ||
+        (exercise.category || "").toLowerCase().includes(lowered) ||
+        (exercise.bodyPart || "").toLowerCase().includes(lowered) ||
+        (exercise.equipment || "").toLowerCase().includes(lowered)
+      );
+    });
+  }
+
   try {
-    const query = search.trim()
-      ? `?search=${encodeURIComponent(search.trim())}`
-      : "";
+    const query = lowered ? `?search=${encodeURIComponent(lowered)}` : "";
 
     const response = await fetch(`${API_BASE}/api/exercises${query}`);
 
@@ -162,6 +179,7 @@ export async function getExercises(search = ""): Promise<Exercise[]> {
 
     if (Array.isArray(data)) return data;
     if (Array.isArray(data.exercises)) return data.exercises;
+    if (Array.isArray(data.items)) return data.items;
 
     return [];
   } catch (error) {
@@ -169,8 +187,6 @@ export async function getExercises(search = ""): Promise<Exercise[]> {
       "Backend not ready yet. Using temporary mock exercise data.",
       error
     );
-
-    const lowered = search.trim().toLowerCase();
 
     if (!lowered) return MOCK_EXERCISES;
 
