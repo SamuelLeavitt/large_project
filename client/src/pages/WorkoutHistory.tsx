@@ -1,19 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import WorkoutChart from "../components/WorkoutChart";
 import WorkoutList from "../components/WorkoutList";
-import { getWorkouts, getAllExercises } from "../utils/workoutData";
+import { getWorkouts } from "../utils/workoutData";
 import type { Workout } from "../utils/workoutData";
-
-const exercises = getAllExercises();
 
 // displays workout history log page - includes line chart to show progress over time for a selected exercise and a full session log below
 export default function WorkoutHistoryPage() {
-  const [selected, setSelected] = useState(exercises[0]);
+  const [selected, setSelected] = useState("");
   const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
+
+  const exercises = useMemo(() => {
+    return [...new Set(allWorkouts.map((workout) => workout.exercise))];
+  }, [allWorkouts]);
 
   useEffect(() => {
     getWorkouts().then(setAllWorkouts);
   }, []);
+
+  useEffect(() => {
+    if (!exercises.length) {
+      setSelected("");
+      return;
+    }
+
+    if (!selected || !exercises.includes(selected)) {
+      setSelected(exercises[0]);
+    }
+  }, [exercises, selected]);
 
   const filtered = allWorkouts.filter((w) => w.exercise === selected);
 
@@ -25,21 +38,27 @@ export default function WorkoutHistoryPage() {
         <br />
       </div>
 
-      <div className="workout-history__selector">
-        {exercises.map((ex) => (
-          <button
-            key={ex}
-            onClick={() => setSelected(ex)}
-            className={`workout-history__exercise-btn ${selected === ex ? "active" : ""}`}
-          >
-            {ex}
-          </button>
-        ))}
-      </div>
+      {exercises.length === 0 ? (
+        <p className="workout-history__empty">No workout sessions logged yet.</p>
+      ) : (
+        <>
+          <div className="workout-history__selector">
+            {exercises.map((ex) => (
+              <button
+                key={ex}
+                onClick={() => setSelected(ex)}
+                className={`workout-history__exercise-btn ${selected === ex ? "active" : ""}`}
+              >
+                {ex}
+              </button>
+            ))}
+          </div>
 
-      {/* chart filters to the selected exercise; list shows full session log intentionally */}
-      <WorkoutChart data={filtered} exercise={selected} />
-      <WorkoutList data={allWorkouts} />
+          {/* chart filters to the selected exercise; list shows full session log intentionally */}
+          {selected ? <WorkoutChart data={filtered} exercise={selected} /> : null}
+          <WorkoutList data={allWorkouts} />
+        </>
+      )}
     </div>
   );
 }
