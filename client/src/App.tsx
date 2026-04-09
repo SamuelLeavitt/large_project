@@ -24,7 +24,7 @@ function App(){
   // Create a state variable to track if the user is logged in or not. Initially set to false.
   // isLoggedIn is the boolean variable.
   // setIsLoggedIn is the function to update the isLoggedIn state.
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem('token')));
 
   return (
     <Router>

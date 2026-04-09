@@ -14,6 +14,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
     const navigate = useNavigate(); // Initializes the useNavigate hook to navigate between routes.
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
         setIsLoggedIn(false); // Changes the login state to false.
         navigate("/login"); // Redirects to the login page after logging out.
     };
