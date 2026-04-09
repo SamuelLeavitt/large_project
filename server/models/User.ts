@@ -5,6 +5,11 @@ export interface IUser {
   username: string;
   email: string;
   passwordHash: string;
+  isEmailVerified: boolean;
+  emailVerificationTokenHash?: string | null;
+  emailVerificationTokenExpiresAt?: Date | null;
+  passwordResetTokenHash?: string | null;
+  passwordResetTokenExpiresAt?: Date | null;
 }
 
 export interface IUserMethods {
@@ -32,6 +37,27 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     passwordHash: {
       type: String,
       required: true
+    },
+    isEmailVerified: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
+    emailVerificationTokenHash: {
+      type: String,
+      default: null
+    },
+    emailVerificationTokenExpiresAt: {
+      type: Date,
+      default: null
+    },
+    passwordResetTokenHash: {
+      type: String,
+      default: null
+    },
+    passwordResetTokenExpiresAt: {
+      type: Date,
+      default: null
     }
   },
   {
