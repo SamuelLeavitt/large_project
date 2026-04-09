@@ -1,89 +1,136 @@
-export interface Workout {
-  date: string;       // "YYYY-MM-DD"
-  time: string;       // "HH:MM" 24h
-  exercise: string;
-  sets: WorkoutSet[];
-}
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 export interface WorkoutSet {
   weight: number;
   reps: number;
 }
 
-//This storage key is for TEMPORARY workout history saved from the frontend.
-//Later the workout history will come from the backend per logged-in user.
-const HISTORY_STORAGE_KEY = "temporary_workout_history";
+export interface Workout {
+  date: string;
+  time: string;
+  exercise: string;
+  sets: WorkoutSet[];
+  workoutName?: string;
+  sessionId?: string;
+  sourceType?: "quickStart" | "template";
+}
 
-//Reads workout history entries that were temporarily saved from the Workout page.
-function getStoredWorkoutHistory(): Workout[] {
-  const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+export interface WorkoutSessionExercise {
+  exerciseId: string;
+  name: string;
+  sets: WorkoutSet[];
+}
 
-  if (!raw) return [];
+export interface WorkoutSession {
+  id?: string;
+  workoutName: string;
+  sourceType: "quickStart" | "template";
+  templateId?: string | null;
+  templateName?: string;
+  completedAt: string;
+  durationSeconds?: number;
+  exercises: WorkoutSessionExercise[];
+}
 
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
+function getAuthToken() {
+  return localStorage.getItem("token") || "";
+}
+
+async function fetchWorkoutSessionsFromApi(): Promise<WorkoutSession[]> {
+  const token = getAuthToken();
+  const response = await fetch(`${API_BASE}/api/workouts/sessions`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+
+  if (response.status === 401) {
     return [];
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to load workout sessions");
+  }
+
+  const data = await response.json();
+  return Array.isArray(data?.items) ? (data.items as WorkoutSession[]) : [];
+}
+
+export async function saveWorkoutSession(session: WorkoutSession): Promise<void> {
+  const normalizedSession: WorkoutSession = {
+    ...session,
+    workoutName: session.workoutName.trim(),
+    exercises: session.exercises
+      .map((exercise) => ({
+        exerciseId: exercise.exerciseId.trim(),
+        name: exercise.name.trim(),
+        sets: exercise.sets.map((set) => ({
+          weight: Number(set.weight) || 0,
+          reps: Number(set.reps) || 0,
+        })),
+      }))
+      .filter((exercise) => exercise.exerciseId && exercise.name),
+  };
+
+  const token = getAuthToken();
+  const response = await fetch(`${API_BASE}/api/workouts/sessions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(normalizedSession),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to save workout session");
   }
 }
 
-//Saves new workout history rows into localStorage just to test the frontend work for now.
-export function appendWorkoutHistory(workouts: Workout[]): void {
-  const current = getStoredWorkoutHistory();
-  const updated = [...workouts, ...current];
-  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+async function getWorkoutSessions(): Promise<WorkoutSession[]> {
+  return fetchWorkoutSessionsFromApi();
 }
 
-// temporarily replaces actual API call to fetch distinct exercise names from database, use mock data for now
-export function getAllExercises(): string[] {
-  const combined = [...MOCK_DATA, ...getStoredWorkoutHistory()];
-  return [...new Set(combined.map((w) => w.exercise))];
+function flattenWorkoutSessions(sessions: WorkoutSession[]): Workout[] {
+  return sessions.flatMap((session) => {
+    const completedAt = new Date(session.completedAt);
+    const date = Number.isNaN(completedAt.getTime())
+      ? new Date().toISOString().slice(0, 10)
+      : completedAt.toISOString().slice(0, 10);
+    const time = Number.isNaN(completedAt.getTime())
+      ? new Date().toTimeString().slice(0, 5)
+      : completedAt.toTimeString().slice(0, 5);
+
+    return session.exercises.map((exercise) => ({
+      date,
+      time,
+      exercise: exercise.name,
+      sets: exercise.sets,
+      workoutName: session.workoutName,
+      sessionId: session.id,
+      sourceType: session.sourceType,
+    }));
+  });
 }
 
-// temporarily replaces actual API call to fetch workouts from database, use mock data for now
+export async function getAllExercises(): Promise<string[]> {
+  const sessions = await getWorkoutSessions();
+  const combined = flattenWorkoutSessions(sessions);
+  return [...new Set(combined.map((workout) => workout.exercise))];
+}
+
 export async function getWorkouts(exercise?: string): Promise<Workout[]> {
-  await new Promise((r) => setTimeout(r, 200));
-  const combined = [...getStoredWorkoutHistory(), ...MOCK_DATA];
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const combined = flattenWorkoutSessions(await getWorkoutSessions());
   return exercise ? combined.filter((w) => w.exercise === exercise) : combined;
 }
 
-// helper functions to calculate max weight for a given workout
 export function getMaxWeight(workout: Workout): number {
+  if (workout.sets.length === 0) {
+    return 0;
+  }
+
   return Math.max(...workout.sets.map((s) => s.weight));
 }
 
-// helper functions to calculate total volume for a given workout
 export function getTotalVolume(workout: Workout): number {
   return workout.sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
 }
-
-// temporary mock data to test frontend while backend is being developed
-const MOCK_DATA: Workout[] = [
-
-  { date: "2025-02-01", time: "08:30", exercise: "Bench Press", sets: [{ weight: 15, reps: 5 }, { weight: 45, reps: 5 }, { weight: 50, reps: 6 }] },
-  { date: "2025-02-01", time: "08:30", exercise: "Squat",       sets: [{ weight: 15, reps: 10 }, { weight: 25, reps: 10 }, { weight: 25, reps: 8 }] },
-
-  { date: "2025-02-05", time: "09:00", exercise: "Deadlift",    sets: [{ weight: 225, reps: 3 }, { weight: 255, reps: 2 }, { weight: 275, reps: 3 }] },
-
-  { date: "2025-02-08", time: "07:15", exercise: "Bench Press", sets: [{ weight: 145, reps: 10 }, { weight: 155, reps: 8 }, { weight: 160, reps: 6 }] },
-  { date: "2025-02-08", time: "17:45", exercise: "Squat",       sets: [{ weight: 195, reps: 8 }, { weight: 215, reps: 6 }, { weight: 225, reps: 4 }] },
-
-  { date: "2025-02-12", time: "10:00", exercise: "Deadlift",    sets: [{ weight: 245, reps: 5 }, { weight: 265, reps: 4 }, { weight: 285, reps: 3 }] },
-
-  { date: "2025-02-15", time: "08:00", exercise: "Bench Press", sets: [{ weight: 155, reps: 1 }, { weight: 165, reps: 1 }, { weight: 170, reps: 1 }] },
-  { date: "2025-02-15", time: "08:00", exercise: "Squat",       sets: [{ weight: 205, reps: 2 }, { weight: 225, reps: 1 }, { weight: 235, reps: 2 }] },
-
-  { date: "2025-02-19", time: "09:30", exercise: "Deadlift",    sets: [{ weight: 255, reps: 5 }, { weight: 275, reps: 4 }, { weight: 295, reps: 2 }] },
-
-  { date: "2025-02-22", time: "06:45", exercise: "Bench Press", sets: [{ weight: 160, reps: 8 }, { weight: 170, reps: 6 }, { weight: 175, reps: 5 }] },
-  { date: "2025-02-22", time: "18:00", exercise: "Squat",       sets: [{ weight: 215, reps: 6 }, { weight: 235, reps: 5 }, { weight: 245, reps: 3 }] },
-
-  { date: "2025-02-26", time: "10:15", exercise: "Deadlift",    sets: [{ weight: 265, reps: 5 }, { weight: 285, reps: 3 }, { weight: 305, reps: 2 }] },
-
-  { date: "2025-03-01", time: "08:00", exercise: "Bench Press", sets: [{ weight: 165, reps: 8 }, { weight: 175, reps: 6 }, { weight: 185, reps: 4 }] },
-  { date: "2025-03-01", time: "08:00", exercise: "Squat",       sets: [{ weight: 225, reps: 6 }, { weight: 245, reps: 4 }, { weight: 255, reps: 3 }] },
-  { date: "2025-03-01", time: "08:00", exercise: "Deadlift",    sets: [{ weight: 275, reps: 5 }, { weight: 295, reps: 3 }, { weight: 315, reps: 2 }] },
-
-  { date: "2025-03-05", time: "09:00", exercise: "Deadlift",    sets: [{ weight: 275, reps: 5 }, { weight: 295, reps: 3 }, { weight: 315, reps: 2 }] },
-];
