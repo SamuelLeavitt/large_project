@@ -128,6 +128,10 @@ const AvatarUpload = () => {
             />
 
             <h2 style={{ color: 'var(--text-h)', margin: 0 }}>Member Name</h2>
+            <p>weight: 130</p>
+            <p>email: user@example.com</p>
+            <p>age: 21 </p>
+
         </div>
     );
 };
