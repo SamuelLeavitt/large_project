@@ -39,7 +39,7 @@ const Register = () => {
                 return;
             }
 
-            navigate("/login");
+            navigate('/email-confirmation', { state: { email } });
         } catch (err) {
             setError("Network error during registration.");
         } finally {

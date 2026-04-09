@@ -19,6 +19,11 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
             setError("Email and password are required.");
             return;
         }
+
+        // Clear any existing auth before attempting a new login.
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+
         setLoading(true);
         try {
             const res = await fetch("/api/auth/login", {
@@ -28,7 +33,17 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
             });
             const data = await res.json();
             if (!res.ok) {
-                setError(data?.error || data?.message || "Login failed");
+                localStorage.removeItem("token");
+                setIsLoggedIn(false);
+
+                const message = data?.error || data?.message || "Login failed";
+                if (res.status === 403) {
+                    navigate('/email-confirmation', { state: { email } });
+                    setLoading(false);
+                    return;
+                }
+
+                setError(message);
                 setLoading(false);
                 return;
             }
@@ -96,6 +111,23 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
             {error && <div style={{ color: 'red', marginBottom: '12px' }}>{error}</div>}
             <div style={{ marginBottom: '20px' }}>
                 <Button label={loading ? "Logging in..." : "Login"} variant="primary" onClick={handleLogin} disabled={loading} />
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <button
+                    type="button"
+                    onClick={() => navigate('/forgot-password')}
+                    style={{
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        color: '#007bff',
+                        textDecoration: 'none',
+                        fontWeight: '500'
+                    }}
+                >
+                    Forgot password?
+                </button>
             </div>
 
             <div style={{ textAlign: 'center' }}>
