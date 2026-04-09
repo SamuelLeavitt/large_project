@@ -39,7 +39,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
             <strong style={{
                 fontSize: '1.2rem',
                 minWidth: 'fit-content'
-            }}>💪 Workout App</strong>
+            }}> Workout App</strong>
 
             {/*Center of Navbar: Search Bar (Only shows if logged in)*/}
             <div style={{
