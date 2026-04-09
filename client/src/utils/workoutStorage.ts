@@ -1,32 +1,100 @@
 import type { SavedWorkout } from "./workoutTypes";
 
-//This file handles TEMPORARY frontend storage for saved workout plans.
-//Right now plans are stored in localStorage so the page works before backend endpoints are ready.
-//Later these functions wil be replaced with real API calls.
+// Saved workout templates now come from backend APIs.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
-const STORAGE_KEY = "saved_workout_plans";
+function getAuthToken() {
+  return localStorage.getItem("token") || "";
+}
 
-export function getSavedWorkouts(): SavedWorkout[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
+async function authorizedFetch(path: string, init?: RequestInit) {
+  const token = getAuthToken();
 
-  if (!raw) return [];
+  return fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers || {}),
+    },
+  });
+}
+
+export async function getSavedWorkouts(): Promise<SavedWorkout[]> {
+  let response: Response;
 
   try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    response = await authorizedFetch("/api/workouts/templates", {
+      method: "GET",
+    });
   } catch {
+    throw new Error("Could not reach workout template service.");
+  }
+
+  if (response.status === 401) {
     return [];
   }
+
+  if (!response.ok) {
+    throw new Error("Failed to load saved workouts");
+  }
+
+  const data = await response.json();
+  return Array.isArray(data?.items) ? (data.items as SavedWorkout[]) : [];
 }
 
-export function saveWorkout(workout: SavedWorkout): void {
-  const current = getSavedWorkouts();
-  const updated = [workout, ...current];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+export async function saveWorkout(workout: SavedWorkout): Promise<SavedWorkout> {
+  let response: Response;
+
+  try {
+    response = await authorizedFetch("/api/workouts/templates", {
+      method: "POST",
+      body: JSON.stringify(workout),
+    });
+  } catch {
+    throw new Error("Could not reach workout template service.");
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to save workout template");
+  }
+
+  const data = await response.json();
+  return data?.item as SavedWorkout;
 }
 
-export function deleteWorkout(workoutId: string): void {
-  const current = getSavedWorkouts();
-  const updated = current.filter((workout) => workout.id !== workoutId);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+export async function updateWorkout(workout: SavedWorkout): Promise<SavedWorkout> {
+  let response: Response;
+
+  try {
+    response = await authorizedFetch(`/api/workouts/templates/${encodeURIComponent(workout.id)}`, {
+      method: "PUT",
+      body: JSON.stringify(workout),
+    });
+  } catch {
+    throw new Error("Could not reach workout template service.");
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to update workout template");
+  }
+
+  const data = await response.json();
+  return data?.item as SavedWorkout;
+}
+
+export async function deleteWorkout(workoutId: string): Promise<void> {
+  let response: Response;
+
+  try {
+    response = await authorizedFetch(`/api/workouts/templates/${encodeURIComponent(workoutId)}`, {
+      method: "DELETE",
+    });
+  } catch {
+    throw new Error("Could not reach workout template service.");
+  }
+
+  if (!response.ok && response.status !== 404) {
+    throw new Error("Failed to delete workout template");
+  }
 }
