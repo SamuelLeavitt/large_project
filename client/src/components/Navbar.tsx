@@ -19,6 +19,62 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
     const [menuOpen, setMenuOpen] = useState(false);
     useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
+    useEffect(() => {
+        if (!isLoggedIn) return;
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            setIsLoggedIn(false);
+            return;
+        }
+
+        const parts = token.split(".");
+
+        if (parts.length !== 3) {
+            localStorage.removeItem("token");
+            setIsLoggedIn(false);
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const base64Url = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
+            const payload = JSON.parse(atob(`${base64Url}${padding}`));
+            const expiryTime = typeof payload?.exp === "number" ? payload.exp * 1000 : 0;
+
+            if (!expiryTime) {
+                localStorage.removeItem("token");
+                setIsLoggedIn(false);
+                navigate("/login");
+                return;
+            }
+
+            const timeUntilExpiry = expiryTime - Date.now();
+
+            if (timeUntilExpiry <= 0) {
+                localStorage.removeItem("token");
+                setIsLoggedIn(false);
+                navigate("/login");
+                return;
+            }
+
+            const timeoutId = window.setTimeout(() => {
+                localStorage.removeItem("token");
+                setIsLoggedIn(false);
+                navigate("/login");
+            }, timeUntilExpiry);
+
+            return () => window.clearTimeout(timeoutId);
+        } catch {
+            localStorage.removeItem("token");
+            setIsLoggedIn(false);
+            navigate("/login");
+            return;
+        }
+    }, [isLoggedIn, navigate, setIsLoggedIn]);
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false); // Changes the login state to false.
