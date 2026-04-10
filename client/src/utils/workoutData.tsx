@@ -1,4 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+const WORKOUT_SESSIONS_CACHE_KEY = "workout-app:sessions-cache";
 
 export interface WorkoutSet {
   weight: number;
@@ -36,22 +37,48 @@ function getAuthToken() {
   return localStorage.getItem("token") || "";
 }
 
+function readWorkoutSessionsCache(): WorkoutSession[] {
+  try {
+    const raw = localStorage.getItem(WORKOUT_SESSIONS_CACHE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as WorkoutSession[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeWorkoutSessionsCache(sessions: WorkoutSession[]) {
+  try {
+    localStorage.setItem(WORKOUT_SESSIONS_CACHE_KEY, JSON.stringify(sessions));
+  } catch {
+    // Ignore cache write failures; network remains the source of truth.
+  }
+}
+
 async function fetchWorkoutSessionsFromApi(): Promise<WorkoutSession[]> {
   const token = getAuthToken();
-  const response = await fetch(`${API_BASE}/api/workouts/sessions`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE}/api/workouts/sessions`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+  } catch {
+    return readWorkoutSessionsCache();
+  }
 
   if (response.status === 401) {
-    return [];
+    return readWorkoutSessionsCache();
   }
 
   if (!response.ok) {
-    throw new Error("Failed to load workout sessions");
+    return readWorkoutSessionsCache();
   }
 
   const data = await response.json();
-  return Array.isArray(data?.items) ? (data.items as WorkoutSession[]) : [];
+  const sessions = Array.isArray(data?.items) ? (data.items as WorkoutSession[]) : [];
+  writeWorkoutSessionsCache(sessions);
+  return sessions;
 }
 
 export async function saveWorkoutSession(session: WorkoutSession): Promise<void> {
@@ -83,6 +110,8 @@ export async function saveWorkoutSession(session: WorkoutSession): Promise<void>
   if (!response.ok) {
     throw new Error("Failed to save workout session");
   }
+
+  writeWorkoutSessionsCache([normalizedSession, ...readWorkoutSessionsCache()]);
 }
 
 async function getWorkoutSessions(): Promise<WorkoutSession[]> {
