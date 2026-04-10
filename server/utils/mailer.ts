@@ -1,44 +1,69 @@
-import nodemailer from "nodemailer";
+// Email delivery via Resend HTTPS API only (Nodemailer removed).
 
-const smtpHost = process.env.SMTP_HOST || "";
-const smtpPort = Number(process.env.SMTP_PORT || "0");
-const smtpUser = process.env.SMTP_USER || "";
-const smtpPass = process.env.SMTP_PASS || "";
+async function sendViaResendApi(options: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+}): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY || process.env.SMTP_PASS || "";
+  const from = process.env.MAIL_FROM || "no-reply@example.com";
+  const timeoutMs = Number(process.env.RESEND_API_TIMEOUT_MS || "15000");
 
-const hasSmtpConfig = Boolean(smtpHost && smtpPort && smtpUser && smtpPass);
+  if (!apiKey) {
+    console.error("[auth-email] No Resend API key configured");
+    return false;
+  }
 
-const transporter = hasSmtpConfig
-  ? nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-    })
-  : null;
+      body: JSON.stringify({
+        from,
+        to: [options.to],
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(`Resend API error ${response.status}: ${errorText || response.statusText}`);
+    }
+
+    console.log("[auth-email] Sent email via Resend API:", {
+      to: options.to,
+      subject: options.subject,
+    });
+
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[auth-email] Failed to send email:", {
+      to: options.to,
+      subject: options.subject,
+      error: message,
+    });
+    return false;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 export async function sendAuthEmail(options: {
   to: string;
   subject: string;
   text: string;
   html: string;
-}) {
-  if (!transporter) {
-    console.log("[auth-email] SMTP not configured, skipping send:", {
-      to: options.to,
-      subject: options.subject,
-      text: options.text,
-    });
-    return;
-  }
-
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM || "no-reply@example.com",
-    to: options.to,
-    subject: options.subject,
-    text: options.text,
-    html: options.html,
-  });
+}): Promise<void> {
+  await sendViaResendApi(options);
 }
