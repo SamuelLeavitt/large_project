@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import LoadingState from "../components/LoadingState";
 import "../App.css"
 
 interface Exercise {
@@ -43,20 +44,23 @@ const ExerciseLibrary = () => {
 
   const fetchExercises = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams();
-    if (search)    params.set("search", search);
-    if (category)  params.set("category", category);
-    if (level)     params.set("level", level);
-    if (equipment) params.set("equipment", equipment);
-    params.set("page", String(page));
-    params.set("limit", "20");
+    try {
+      const params = new URLSearchParams();
+      if (search)    params.set("search", search);
+      if (category)  params.set("category", category);
+      if (level)     params.set("level", level);
+      if (equipment) params.set("equipment", equipment);
+      params.set("page", String(page));
+      params.set("limit", "20");
 
-    const res  = await fetch(`/api/exercises?${params}`);
-    const data = await res.json();
-    setExercises(data.items ?? []);
-    setTotal(data.pagination?.total ?? 0);
-    setTotalPages(data.pagination?.pages ?? 1);
-    setLoading(false);
+      const res  = await fetch(`/api/exercises?${params}`);
+      const data = await res.json();
+      setExercises(data.items ?? []);
+      setTotal(data.pagination?.total ?? 0);
+      setTotalPages(data.pagination?.pages ?? 1);
+    } finally {
+      setLoading(false);
+    }
   }, [search, category, level, equipment, page]);
 
   useEffect(() => { fetchExercises(); }, [fetchExercises]);
@@ -97,11 +101,13 @@ const ExerciseLibrary = () => {
 
         {/* exercise list */}
         <div className="ex-lib-list">
-          {loading
-            ? Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="ex-lib-skeleton" />
-              ))
-            : exercises.map((ex) => (
+          {loading ? (
+            <LoadingState
+              title="Loading exercises"
+              description="Fetching the current exercise library."
+              minHeight="260px"
+            />
+          ) : exercises.map((ex) => (
                 <button
                   key={ex._id}
                   className="ex-lib-row"
