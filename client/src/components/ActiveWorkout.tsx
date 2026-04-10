@@ -48,7 +48,6 @@ interface QuickStartWorkoutBuilderProps {
   onFinishWorkout: () => void;
   onCancelWorkout: () => void;
   disableFinishWorkout?: boolean;
-  finishBlockedMessage?: string;
 }
 
 const formatStopwatch = (totalSeconds: number) => {
@@ -308,7 +307,6 @@ export const QuickStartWorkoutBuilder = ({
   onFinishWorkout,
   onCancelWorkout,
   disableFinishWorkout = false,
-  finishBlockedMessage,
 }: QuickStartWorkoutBuilderProps) => {
   const quickStartCardClassName =
     "w-full rounded-[18px] border border-[#d8e5f2] bg-[#f8fbff] p-5 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]";
@@ -376,7 +374,6 @@ export const QuickStartWorkoutBuilder = ({
         ) : (
           <div style={{ display: "grid", gap: "16px" }}>
             {quickStartExercises.map((exercise, index) => {
-              const completedSets = quickStartLogs[index]?.sets.length || 0;
               const loggedSets = quickStartLogs[index]?.sets ?? [];
 
               return (
