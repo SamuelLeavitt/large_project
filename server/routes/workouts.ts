@@ -25,6 +25,15 @@ type WorkoutSessionPayload = {
   }>;
 };
 
+type WorkoutTemplateExercisePayload = {
+  exerciseId?: string;
+  name?: string;
+  category?: string;
+  bodyPart?: string;
+  sets?: number;
+  reps?: string;
+};
+
 function getUserId(req: Request): mongoose.Types.ObjectId | null {
   const authHeader = req.headers.authorization || "";
 
@@ -177,7 +186,7 @@ router.post("/templates", async (req: Request, res: Response) => {
     }
 
     const normalizedExercises = exercises
-      .map((exercise) => ({
+      .map((exercise: WorkoutTemplateExercisePayload) => ({
         exerciseId: String(exercise?.exerciseId ?? "").trim(),
         name: String(exercise?.name ?? "").trim(),
         category: String(exercise?.category ?? "").trim(),
@@ -185,7 +194,7 @@ router.post("/templates", async (req: Request, res: Response) => {
         sets: Math.max(0, Number(exercise?.sets) || 0),
         reps: String(exercise?.reps ?? "0").trim() || "0",
       }))
-      .filter((exercise) => exercise.exerciseId && exercise.name);
+      .filter((exercise: WorkoutTemplateExercisePayload) => exercise.exerciseId && exercise.name);
 
     const created = await WorkoutTemplate.create({
       userId,
@@ -232,7 +241,7 @@ router.put("/templates/:id", async (req: Request, res: Response) => {
     }
 
     const normalizedExercises = exercises
-      .map((exercise) => ({
+      .map((exercise: WorkoutTemplateExercisePayload) => ({
         exerciseId: String(exercise?.exerciseId ?? "").trim(),
         name: String(exercise?.name ?? "").trim(),
         category: String(exercise?.category ?? "").trim(),
@@ -240,7 +249,7 @@ router.put("/templates/:id", async (req: Request, res: Response) => {
         sets: Math.max(0, Number(exercise?.sets) || 0),
         reps: String(exercise?.reps ?? "0").trim() || "0",
       }))
-      .filter((exercise) => exercise.exerciseId && exercise.name);
+      .filter((exercise: WorkoutTemplateExercisePayload) => exercise.exerciseId && exercise.name);
 
     const updated = await WorkoutTemplate.findOneAndUpdate(
       { _id: id, userId },
