@@ -31,7 +31,8 @@ const SavedTemplates = ({
   onDeleteWorkoutPlan,
 }: SavedTemplatesProps) => {
   return (
-    <div style={{ display: "grid", gap: "24px" }}>
+    // added a fixed width so it has a default size and doesn't increase or decrease when adding templates
+    <div style={{ display: "grid", gap: "24px",width:"900px" }}>
       <div style={sectionStyle}>
         <div className="flex items-center justify-between mb-4 gap-4">
           <h2>Saved Templates</h2>
