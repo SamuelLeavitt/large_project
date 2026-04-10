@@ -15,6 +15,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import EmailConfirmation from './pages/EmailConfirmation';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import ExerciseLibrary from './pages/ExerciseLibrary';
 
 // test
 
@@ -64,6 +65,8 @@ function App(){
         <Route path="/WorkoutSearchByCategory" element={<WorkoutSearchByCategory />} />
         
         <Route path="/workout-history" element={isLoggedIn ? <WorkoutHistory /> : <Navigate to='/login' />} />
+
+        <Route path="/exercises" element={<ExerciseLibrary />} />
       
       </Routes>
 
