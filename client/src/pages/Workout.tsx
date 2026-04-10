@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { QuickStartWorkoutBuilder } from "../components/ActiveWorkout";
 import Button from "../components/Button";
+import SavedTemplates from "../components/SavedTemplates";
 import { getExercises } from "../utils/workoutApi";
 import {
   deleteWorkout,
@@ -84,13 +85,6 @@ const fixedExercisePickerBoxStyle: React.CSSProperties = {
   overflowY: "auto",
 };
 
-const fixedSavedWorkoutsListStyle: React.CSSProperties = {
-  minHeight: "420px",
-  maxHeight: "420px",
-  overflowY: "auto",
-  paddingRight: "6px",
-};
-
 type BuilderStep =
   | "hidden"
   | "name"
@@ -98,8 +92,7 @@ type BuilderStep =
   | "exercisePicker"
   | "quickStartBuilder"
   | "quickStartExercisePicker"
-  | "quickStartFinishQuestion"
-  | "quickStartSaveName";
+  | "quickStartFinishQuestion";
 
 type ActiveWorkoutStep = "session" | "exercisePicker" | "finishQuestion";
 
@@ -166,7 +159,6 @@ const Workout = () => {
   const [quickStartLogs, setQuickStartLogs] = useState<ActiveExerciseLog[]>([]);
 
   //This is a note: these states control the Quick Start finish flow pages instead of using popup windows.
-  const [quickStartShouldSavePlan, setQuickStartShouldSavePlan] = useState(false);
   const [quickStartPlanName, setQuickStartPlanName] = useState("");
 
   //Stopwatch state for active workouts.
@@ -578,7 +570,6 @@ const Workout = () => {
     setQuickStartSearch("");
     setSelectedZone("Upper Body");
     setBuilderStep("hidden");
-    setQuickStartShouldSavePlan(false);
     setQuickStartPlanName("");
     resetWorkoutInputs();
     setElapsedSeconds(0);
@@ -698,11 +689,13 @@ const Workout = () => {
   const saveQuickStartToHistory = async () => {
     if (quickStartExercises.length === 0) return;
 
+    const workoutName = quickStartPlanName.trim() || "Quick Start Workout";
+
     await saveWorkoutSession({
-      workoutName: quickStartPlanName.trim() || "Quick Start Workout",
+      workoutName,
       sourceType: "quickStart",
       templateId: null,
-      templateName: quickStartPlanName.trim(),
+      templateName: workoutName,
       completedAt: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       exercises: quickStartExercises.map((exercise, index) => ({
@@ -717,14 +710,13 @@ const Workout = () => {
 
   const finishQuickStartAndReturn = () => {
     resetQuickStartFlow();
-    setQuickStartShouldSavePlan(false);
     setQuickStartPlanName("");
   };
 
   const handleSaveQuickStartAsPlan = async () => {
-    const trimmedName = quickStartPlanName.trim();
+    const trimmedName = quickStartPlanName.trim() || "Quick Start Workout";
 
-    if (!trimmedName || quickStartExercises.length === 0) return;
+    if (quickStartExercises.length === 0) return;
 
     const newWorkout: SavedWorkout = {
       id: crypto.randomUUID(),
@@ -756,8 +748,6 @@ const Workout = () => {
     await saveQuickStartToHistory();
 
     //This is a note: move to a dedicated page instead of using popup questions.
-    setQuickStartShouldSavePlan(false);
-    setQuickStartPlanName("Quick Start Workout");
     setBuilderStep("quickStartFinishQuestion");
   };
 
@@ -1424,71 +1414,13 @@ const Workout = () => {
                 label="Yes, Save as Plan"
                 variant="primary"
                 onClick={() => {
-                  setQuickStartShouldSavePlan(true);
-                  setBuilderStep("quickStartSaveName");
+                  void handleSaveQuickStartAsPlan();
                 }}
               />
               <Button
                 label="No, Finish"
                 variant="secondary"
                 onClick={finishQuickStartAndReturn}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  //QUICK START SAVE NAME PAGE
-  if (builderStep === "quickStartSaveName") {
-    return (
-      <div
-        style={{
-          maxWidth: "820px",
-          margin: "0 auto",
-          padding: "24px",
-          display: "grid",
-          gap: "24px",
-        }}
-      >
-        <div>
-          <h1>Save Quick Start Workout</h1>
-          <p>
-            {quickStartShouldSavePlan
-              ? "Enter a name for this workout plan so you can use it again later."
-              : "Enter a name for this workout plan."}
-          </p>
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ display: "grid", gap: "18px" }}>
-            <div>
-              <label style={{ display: "block", marginBottom: "6px" }}>
-                Workout Name
-              </label>
-              <input
-                type="text"
-                placeholder="Example: Quick Push Day"
-                value={quickStartPlanName}
-                onChange={(e) => setQuickStartPlanName(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Button
-                label="Save Workout Plan"
-                variant="primary"
-                onClick={() => {
-                  void handleSaveQuickStartAsPlan();
-                }}
-                disabled={!quickStartPlanName.trim()}
-              />
-              <Button
-                label="Back"
-                variant="secondary"
-                onClick={() => setBuilderStep("quickStartFinishQuestion")}
               />
             </div>
           </div>
@@ -1513,89 +1445,14 @@ const Workout = () => {
               onClick={handleStartBlankQuickStart}
             />
 
-        <div style={{ display: "grid", gap: "24px" }}>
-          <div style={sectionStyle}>
-            <div className ="flex items-center justify-between mb-4 gap-4">
-              <h2>Saved Templates</h2>              
-              <Button
-                  label="Create Template"
-                  variant="primary"
-                  onClick={handleCreateNewWorkout}>  
-              </Button>
-            </div>
-
-            {filteredSavedWorkouts.length === 0 ? (
-              <p style={{ marginTop: "12px" }}>No saved templates yet.</p>
-            ) : (
-              <div style={{ ...fixedSavedWorkoutsListStyle, marginTop: "12px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: "14px" }}>
-                  {filteredSavedWorkouts.map((workout) => (
-                    <div
-                      key={workout.id}
-                      style={{
-                        border: "1px solid #d1e1ef",
-                        borderRadius: "16px",
-                        padding: "14px",
-                        background: "#ffffff",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: "12px",
-                          flexWrap: "wrap",
-                          alignItems: "center",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <h3 style={{ margin: 0, wordBreak: "break-word" }}>{workout.name}</h3>
-                          <p style={{ marginTop: "6px" }}>
-                            <strong>Body Area:</strong> {workout.bodyPart}
-                          </p>
-                        </div>
-
-                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                          <Button
-                            label="Start Workout"
-                            variant="primary"
-                            onClick={() => handleStartWorkout(workout)}
-                          />
-                          <Button
-                            label="Delete"
-                            variant="danger"
-                            onClick={() => {
-                              void handleDeleteWorkoutPlan(workout.id);
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: "grid", gap: "8px" }}>
-                        {workout.exercises.map((exercise, index) => (
-                          <div
-                            key={`${workout.id}-${index}`}
-                            style={{
-                              padding: "10px",
-                              borderRadius: "10px",
-                              background: "#f3f8fd",
-                            }}
-                          >
-                            <strong>{exercise.name}</strong>
-                            <p>
-                              {exercise.sets} sets
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <SavedTemplates
+          filteredSavedWorkouts={filteredSavedWorkouts}
+          onCreateTemplate={handleCreateNewWorkout}
+          onStartWorkout={handleStartWorkout}
+          onDeleteWorkoutPlan={(workoutId) => {
+            void handleDeleteWorkoutPlan(workoutId);
+          }}
+        />
 
     </div>
   );
