@@ -4,7 +4,11 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { sendAuthEmail } from "../utils/mailer.js";
 
-const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const router = express.Router();
+
+function getClientUrl(): string {
+  return process.env.CLIENT_URL || "http://localhost:5173";
+}
 
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -13,8 +17,6 @@ function hashToken(token: string) {
 function createToken() {
   return crypto.randomBytes(32).toString("hex");
 }
-
-const router = express.Router();
 
 router.post("/register", async (req, res) => {
   try {
@@ -55,7 +57,7 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
-    const verificationLink = `${clientUrl}/verify-email?token=${verificationToken}`;
+    const verificationLink = `${getClientUrl()}/verify-email?token=${verificationToken}`;
 
     await sendAuthEmail({
       to: email,
@@ -205,7 +207,7 @@ router.post("/resend-verification", async (req, res) => {
     user.emailVerificationTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24);
     await user.save();
 
-    const verificationLink = `${clientUrl}/verify-email?token=${verificationToken}`;
+    const verificationLink = `${getClientUrl()}/verify-email?token=${verificationToken}`;
     await sendAuthEmail({
       to: email,
       subject: "Verify your email",
@@ -241,7 +243,7 @@ router.post("/forgot-password", async (req, res) => {
     user.passwordResetTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 30);
     await user.save();
 
-    const resetLink = `${clientUrl}/reset-password?token=${resetToken}`;
+    const resetLink = `${getClientUrl()}/reset-password?token=${resetToken}`;
     await sendAuthEmail({
       to: email,
       subject: "Reset your password",
