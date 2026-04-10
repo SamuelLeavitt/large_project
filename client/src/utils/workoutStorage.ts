@@ -2,9 +2,28 @@ import type { SavedWorkout } from "./workoutTypes";
 
 // Saved workout templates now come from backend APIs.
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+const SAVED_WORKOUTS_CACHE_KEY = "workout-app:saved-workouts-cache";
 
 function getAuthToken() {
   return localStorage.getItem("token") || "";
+}
+
+function readSavedWorkoutsCache(): SavedWorkout[] {
+  try {
+    const raw = localStorage.getItem(SAVED_WORKOUTS_CACHE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as SavedWorkout[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeSavedWorkoutsCache(workouts: SavedWorkout[]) {
+  try {
+    localStorage.setItem(SAVED_WORKOUTS_CACHE_KEY, JSON.stringify(workouts));
+  } catch {
+    // Ignore cache write failures; the network response is still authoritative.
+  }
 }
 
 async function authorizedFetch(path: string, init?: RequestInit) {
@@ -28,19 +47,21 @@ export async function getSavedWorkouts(): Promise<SavedWorkout[]> {
       method: "GET",
     });
   } catch {
-    throw new Error("Could not reach workout template service.");
+    return readSavedWorkoutsCache();
   }
 
   if (response.status === 401) {
-    return [];
+    return readSavedWorkoutsCache();
   }
 
   if (!response.ok) {
-    throw new Error("Failed to load saved workouts");
+    return readSavedWorkoutsCache();
   }
 
   const data = await response.json();
-  return Array.isArray(data?.items) ? (data.items as SavedWorkout[]) : [];
+  const savedWorkouts = Array.isArray(data?.items) ? (data.items as SavedWorkout[]) : [];
+  writeSavedWorkoutsCache(savedWorkouts);
+  return savedWorkouts;
 }
 
 export async function saveWorkout(workout: SavedWorkout): Promise<SavedWorkout> {
@@ -60,7 +81,9 @@ export async function saveWorkout(workout: SavedWorkout): Promise<SavedWorkout> 
   }
 
   const data = await response.json();
-  return data?.item as SavedWorkout;
+  const savedWorkout = data?.item as SavedWorkout;
+  writeSavedWorkoutsCache([savedWorkout, ...readSavedWorkoutsCache().filter((item) => item.id !== savedWorkout.id)]);
+  return savedWorkout;
 }
 
 export async function updateWorkout(workout: SavedWorkout): Promise<SavedWorkout> {
@@ -80,7 +103,11 @@ export async function updateWorkout(workout: SavedWorkout): Promise<SavedWorkout
   }
 
   const data = await response.json();
-  return data?.item as SavedWorkout;
+  const updatedWorkout = data?.item as SavedWorkout;
+  writeSavedWorkoutsCache(
+    readSavedWorkoutsCache().map((item) => (item.id === updatedWorkout.id ? updatedWorkout : item))
+  );
+  return updatedWorkout;
 }
 
 export async function deleteWorkout(workoutId: string): Promise<void> {
@@ -97,4 +124,6 @@ export async function deleteWorkout(workoutId: string): Promise<void> {
   if (!response.ok && response.status !== 404) {
     throw new Error("Failed to delete workout template");
   }
+
+  writeSavedWorkoutsCache(readSavedWorkoutsCache().filter((item) => item.id !== workoutId));
 }
