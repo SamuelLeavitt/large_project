@@ -41,12 +41,15 @@ function CustomTooltip({ active, payload, metric }: any) {
 export default function WorkoutChart({ data, exercise }: Props) {
   const [metric, setMetric] = useState<Metric>("maxWeight");
 
-  const chartData = data.map((w) => ({
-    date: formatDateShort(w.date),
-    maxWeight: getMaxWeight(w),
-    volume: getTotalVolume(w),
-    workout: w,
-  }));
+  const chartData = data
+    .slice()
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .map((w) => ({
+        date: formatDateShort(w.date),
+        maxWeight: getMaxWeight(w),
+        volume: getTotalVolume(w),
+        workout: w,
+    }));
 
   return (
     <div className="workout-chart">
