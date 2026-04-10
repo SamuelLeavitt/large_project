@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import LoadingState from "../components/LoadingState";
 import WorkoutChart from "../components/WorkoutChart";
 import WorkoutList from "../components/WorkoutList";
 import { getWorkouts } from "../utils/workoutData";
@@ -8,13 +9,35 @@ import type { Workout } from "../utils/workoutData";
 export default function WorkoutHistoryPage() {
   const [selected, setSelected] = useState("");
   const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const exercises = useMemo(() => {
     return [...new Set(allWorkouts.map((workout) => workout.exercise))];
   }, [allWorkouts]);
 
   useEffect(() => {
-    getWorkouts().then(setAllWorkouts);
+    let isActive = true;
+
+    const loadWorkoutHistory = async () => {
+      setLoading(true);
+
+      try {
+        const workouts = await getWorkouts();
+        if (isActive) {
+          setAllWorkouts(workouts);
+        }
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadWorkoutHistory();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -38,7 +61,13 @@ export default function WorkoutHistoryPage() {
         <br />
       </div>
 
-      {exercises.length === 0 ? (
+      {loading ? (
+        <LoadingState
+          title="Loading workout history"
+          description="Fetching your saved sessions."
+          minHeight="320px"
+        />
+      ) : exercises.length === 0 ? (
         <p className="workout-history__empty">No workout sessions logged yet.</p>
       ) : (
         <>
