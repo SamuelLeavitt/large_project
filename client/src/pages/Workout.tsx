@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import AddExercise from "../components/AddExercise";
 import { QuickStartWorkoutBuilder } from "../components/ActiveWorkout";
 import Button from "../components/Button";
+import LoadingState from "../components/LoadingState";
 import SavedTemplates from "../components/SavedTemplates";
 import { getExercises } from "../utils/workoutApi";
 import {
@@ -164,6 +166,7 @@ const Workout = () => {
   //Stopwatch state for active workouts.
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isStopwatchRunning, setIsStopwatchRunning] = useState(false);
+  const [loadingWorkoutPage, setLoadingWorkoutPage] = useState(true);
 
   const refreshSavedWorkouts = async () => {
     try {
@@ -175,9 +178,29 @@ const Workout = () => {
     }
   };
 
+  const loadExercises = async (searchTerm = "") => {
+    setLoadingExercises(true);
+
+    try {
+      const exercises = await getExercises(searchTerm);
+      setAllExercises(exercises);
+    } finally {
+      setLoadingExercises(false);
+    }
+  };
+
   useEffect(() => {
-    loadExercises();
-    void refreshSavedWorkouts();
+    const initializeWorkoutPage = async () => {
+      setLoadingWorkoutPage(true);
+
+      try {
+        await Promise.all([loadExercises(), refreshSavedWorkouts()]);
+      } finally {
+        setLoadingWorkoutPage(false);
+      }
+    };
+
+    void initializeWorkoutPage();
   }, []);
 
   useEffect(() => {
@@ -189,13 +212,6 @@ const Workout = () => {
 
     return () => window.clearInterval(interval);
   }, [isStopwatchRunning]);
-
-  const loadExercises = async (searchTerm = "") => {
-    setLoadingExercises(true);
-    const exercises = await getExercises(searchTerm);
-    setAllExercises(exercises);
-    setLoadingExercises(false);
-  };
 
   const filteredSavedWorkouts = savedWorkouts;
 
@@ -781,112 +797,26 @@ const Workout = () => {
   //ACTIVE WORKOUT ADD EXERCISE PAGE
   if (activeWorkoutStep === "exercisePicker") {
     return (
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "24px",
-          display: "grid",
-          gap: "24px",
-        }}
-      >
-        <div>
-          <h1>Add Exercise</h1>
-          <p>Choose a body zone or search for exercises to add to this workout.</p>
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ display: "grid", gap: "18px" }}>
-            <div>
-              <h3 style={{ marginBottom: "10px" }}>Choose a Body Zone</h3>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {zoneOptions.map((zone) => (
-                  <button
-                    key={zone}
-                    type="button"
-                    style={tabButtonStyle(selectedZone === zone)}
-                    onClick={() => handleSelectZone(zone)}
-                  >
-                    {zone}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <input
-                type="text"
-                placeholder="Search exercises"
-                value={builderSearch}
-                onChange={(e) => setBuilderSearch(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={fixedExercisePickerBoxStyle}>
-              {loadingExercises ? (
-                <p>Loading exercises...</p>
-              ) : zoneExercises.length === 0 ? (
-                <p>No exercises found in this body zone.</p>
-              ) : (
-                <div style={{ display: "grid", gap: "10px" }}>
-                  {zoneExercises.map((exercise) => {
-                    const alreadyAdded = activeWorkoutExercises.some(
-                      (item) =>
-                        item.exerciseId ===
-                        (exercise._id || exercise.id || exercise.datasetId || exercise.name)
-                    );
-
-                    return (
-                      <div
-                        key={exercise._id || exercise.id || exercise.datasetId || exercise.name}
-                        style={{
-                          border: "1px solid var(--border)",
-                          borderRadius: "12px",
-                          padding: "12px",
-                          background: "var(--social-bg)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "10px",
-                            flexWrap: "wrap",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <h3 style={{ margin: "0 0 8px 0", wordBreak: "break-word" }}>
-                              {exercise.name}
-                            </h3>
-                            <p style={{ margin: "0 0 4px 0" }}>
-                              <strong>Body Area:</strong> {exercise.bodyPart || "N/A"}
-                            </p>
-                            <p style={{ margin: 0 }}>
-                              <strong>Equipment:</strong> {exercise.equipment || "N/A"}
-                            </p>
-                          </div>
-
-                          <Button
-                            label={alreadyAdded ? "Added" : "Add"}
-                            variant="primary"
-                            onClick={() => addExerciseToActiveWorkout(exercise)}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Button label="Cancel" variant="secondary" onClick={() => setActiveWorkoutStep("session")} />
-            </div>
-          </div>
-        </div>
-      </div>
+      <AddExercise
+        title="Add Exercise"
+        description="Choose a body zone or search for exercises to add to this workout."
+        searchValue={builderSearch}
+        onSearchChange={setBuilderSearch}
+        loadingExercises={loadingExercises}
+        exercises={zoneExercises}
+        zoneOptions={zoneOptions}
+        selectedZone={selectedZone}
+        onSelectZone={handleSelectZone}
+        isExerciseAlreadyAdded={(exercise) =>
+          activeWorkoutExercises.some(
+            (item) => item.exerciseId === (exercise._id || exercise.id || exercise.datasetId || exercise.name)
+          )
+        }
+        onAddExercise={addExerciseToActiveWorkout}
+        onCancel={() => setActiveWorkoutStep("session")}
+        cancelLabel="Cancel"
+        cancelVariant="secondary"
+      />
     );
   }
 
@@ -914,7 +844,6 @@ const Workout = () => {
         onFinishWorkout={handleSaveCompletedWorkout}
         onCancelWorkout={exitActiveWorkout}
         disableFinishWorkout={activeWorkoutExercises.length === 0 || hasEmptyActiveSet(activeLogs)}
-        finishBlockedMessage={finishBlockedMessage}
       />
     );
   }
@@ -1263,7 +1192,7 @@ const Workout = () => {
         onFinishWorkout={handleFinishQuickStartWorkout}
         onCancelWorkout={resetQuickStartFlow}
         disableFinishWorkout={quickStartExercises.length === 0 || hasEmptyActiveSet(quickStartLogs)}
-        finishBlockedMessage={finishBlockedMessage}
+
       />
     );
   }
@@ -1272,118 +1201,26 @@ const Workout = () => {
   //QUICK START ADD EXERCISE PAGE
   if (builderStep === "quickStartExercisePicker") {
     return (
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "24px",
-          display: "grid",
-          gap: "24px",
-        }}
-      >
-        <div>
-          <h1>Add Exercise</h1>
-          <p>
-            Choose a body zone or search for exercises to add to your Quick Start workout.
-          </p>
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ display: "grid", gap: "18px" }}>
-            <div>
-              <h3 style={{ marginBottom: "10px" }}>Choose a Body Zone</h3>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {zoneOptions.map((zone) => (
-                  <button
-                    key={zone}
-                    type="button"
-                    style={tabButtonStyle(selectedZone === zone)}
-                    onClick={() => handleSelectZone(zone)}
-                  >
-                    {zone}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <input
-                type="text"
-                placeholder="Search exercises"
-                value={quickStartSearch}
-                onChange={(e) => setQuickStartSearch(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={fixedExercisePickerBoxStyle}>
-              {loadingExercises ? (
-                <p>Loading exercises...</p>
-              ) : quickStartZoneExercises.length === 0 ? (
-                <p>No exercises found in this body zone.</p>
-              ) : (
-                <div style={{ display: "grid", gap: "10px" }}>
-                  {quickStartZoneExercises.map((exercise) => {
-                    const alreadyAdded = quickStartExercises.some(
-                      (item) =>
-                        item.exerciseId ===
-                        (exercise._id || exercise.id || exercise.datasetId || exercise.name)
-                    );
-
-                    return (
-                      <div
-                        key={exercise._id || exercise.id || exercise.datasetId || exercise.name}
-                        style={{
-                          border: "1px solid var(--border)",
-                          borderRadius: "12px",
-                          padding: "12px",
-                          background: "var(--social-bg)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "10px",
-                            flexWrap: "wrap",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <h3 style={{ margin: "0 0 8px 0", wordBreak: "break-word" }}>
-                              {exercise.name}
-                            </h3>
-                            <p style={{ margin: "0 0 4px 0" }}>
-                              <strong>Body Area:</strong> {exercise.bodyPart || "N/A"}
-                            </p>
-                            <p style={{ margin: 0 }}>
-                              <strong>Equipment:</strong> {exercise.equipment || "N/A"}
-                            </p>
-                          </div>
-
-                          <Button
-                            label={alreadyAdded ? "Added" : "Add"}
-                            variant="primary"
-                            onClick={() => addExerciseToQuickStart(exercise)}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Button
-                label="Cancel"
-                variant="danger"
-                onClick={() => setBuilderStep("quickStartBuilder")}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <AddExercise
+        title="Add Exercise"
+        description="Choose a body zone or search for exercises to add to your Quick Start workout."
+        searchValue={quickStartSearch}
+        onSearchChange={setQuickStartSearch}
+        loadingExercises={loadingExercises}
+        exercises={quickStartZoneExercises}
+        zoneOptions={zoneOptions}
+        selectedZone={selectedZone}
+        onSelectZone={handleSelectZone}
+        isExerciseAlreadyAdded={(exercise) =>
+          quickStartExercises.some(
+            (item) => item.exerciseId === (exercise._id || exercise.id || exercise.datasetId || exercise.name)
+          )
+        }
+        onAddExercise={addExerciseToQuickStart}
+        onCancel={() => setBuilderStep("quickStartBuilder")}
+        cancelLabel="Cancel"
+        cancelVariant="danger"
+      />
     );
   }
 
@@ -1430,6 +1267,16 @@ const Workout = () => {
   }
 
   //NORMAL PAGE VIEW (Including Saved Page, Quick Start Page, and Browse Page)
+  if (loadingWorkoutPage) {
+    return (
+      <LoadingState
+        title="Loading workout"
+        description="Fetching exercises and saved templates."
+        minHeight="360px"
+      />
+    );
+  }
+
   return (
     <div
       style={{
