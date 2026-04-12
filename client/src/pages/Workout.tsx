@@ -868,7 +868,7 @@ useEffect(() => {
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <Button
                 label="Save Name"
-                variant="primary"
+                variant="secondary"
                 onClick={handleSaveWorkoutName}
                 disabled={!workoutName.trim()}
               />
@@ -1272,6 +1272,7 @@ useEffect(() => {
       </div>
             <Button
               label = "Start an Empty Workout"
+              variant="secondary"
               onClick={handleStartBlankQuickStart}
             />
 

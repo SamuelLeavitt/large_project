@@ -237,20 +237,16 @@ const ActiveWorkout = ({
         <p className="m-0 text-4xl font-bold leading-none text-[#2e9be8]">
           {formatStopwatch(elapsedSeconds)}
         </p>
-        <button
-          type="button"
-          className="cursor-pointer rounded-lg border border-[var(--accent-border)] bg-[var(--accent)] px-5 py-2.5 font-bold text-[var(--bg)] transition"
-          onClick={onToggleStopwatch}
-        >
-          {isStopwatchRunning ? "Pause" : "Start"}
-        </button>
-        <button
-          type="button"
-          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--social-bg)] px-5 py-2.5 font-bold text-[var(--text)] transition"
-          onClick={onResetStopwatch}
-        >
-          Reset
-        </button>
+          <Button
+            label={isStopwatchRunning ? "Pause" : "Start"}
+            variant={isStopwatchRunning ? "secondary" : "start"}
+            onClick={onToggleStopwatch}
+          />
+          <Button
+            label="Reset"
+            variant="secondary"
+            onClick={onResetStopwatch}
+          />
       </div>
 
       <div
@@ -345,10 +341,10 @@ export const QuickStartWorkoutBuilder = ({
         <div className="flex flex-wrap gap-[10px]">
           <Button
             label={isStopwatchRunning ? "Pause" : "Start"}
-            variant="primary"
+            variant={isStopwatchRunning ? "secondary": "start"}
             onClick={onToggleStopwatch}
           />
-          <Button label="Reset" variant="secondary" onClick={onResetStopwatch} />
+          <Button label="Reset" variant="danger" onClick={onResetStopwatch} />
         </div>
       </div>
 
@@ -365,7 +361,7 @@ export const QuickStartWorkoutBuilder = ({
         >
           <h2 style={{ margin: 0 }}>Exercises</h2>
           {onOpenExercisePicker ? (
-            <Button label="Add Exercise" variant="primary" onClick={onOpenExercisePicker} />
+            <Button label="+ Add Exercise" variant="secondary" onClick={onOpenExercisePicker} />
           ) : null}
         </div>
 
@@ -404,7 +400,7 @@ export const QuickStartWorkoutBuilder = ({
                     </div>
 
                     {onRemoveExercise ? (
-                      <Button label="Remove" variant="danger" onClick={() => onRemoveExercise(index)} />
+                      <Button label="- Remove" variant="danger" onClick={() => onRemoveExercise(index)} />
                     ) : null}
                   </div>
 
