@@ -68,7 +68,7 @@ const ExerciseLibrary = () => {
 
   return (
     <>
-      <div className="workout-list">
+      <div className="workout-list" style={{ maxWidth: "900px", margin: "0 auto" }}>
         <h2 style={{ marginBottom: "24px" }}>Exercise Library</h2>
 
         {/* filters */}

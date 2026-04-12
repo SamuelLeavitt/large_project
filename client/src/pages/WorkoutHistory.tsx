@@ -54,11 +54,10 @@ export default function WorkoutHistoryPage() {
   const filtered = allWorkouts.filter((w) => w.exercise === selected);
 
   return (
-    <div className="workout-history">
-      <div>
-        <br />
-        <h1>Workout History</h1>
-        <br />
+    <div className="wh-root">
+      <div className="wh-page-header">
+
+        <p className="wh-page-subtitle">Track your progress over time</p>
       </div>
 
       {loading ? (
@@ -68,24 +67,36 @@ export default function WorkoutHistoryPage() {
           minHeight="320px"
         />
       ) : exercises.length === 0 ? (
-        <p className="workout-history__empty">No workout sessions logged yet.</p>
+        <div className="wh-empty">
+          <span className="wh-empty__icon">📋</span>
+          <p>No workout sessions logged yet.</p>
+        </div>
       ) : (
         <>
-          <div className="workout-history__selector">
-            {exercises.map((ex) => (
-              <button
-                key={ex}
-                onClick={() => setSelected(ex)}
-                className={`workout-history__exercise-btn ${selected === ex ? "active" : ""}`}
-              >
-                {ex}
-              </button>
-            ))}
+          {/* exercise selector */}
+          <div className="wh-section">
+            <p className="wh-section__label">Exercise</p>
+            <select
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="wh-select"
+            >
+              {exercises.map((ex) => (
+                <option key={ex} value={ex}>{ex}</option>
+              ))}
+            </select>
           </div>
 
           {/* chart filters to the selected exercise; list shows full session log intentionally */}
-          {selected ? <WorkoutChart data={filtered} exercise={selected} /> : null}
-          <WorkoutList data={allWorkouts} />
+          {selected && (
+            <div className="wh-section">
+              <WorkoutChart data={filtered} exercise={selected} />
+            </div>
+          )}
+
+          <div className="wh-section">
+            <WorkoutList data={allWorkouts} />
+          </div>
         </>
       )}
     </div>
