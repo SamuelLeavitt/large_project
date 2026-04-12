@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AddExercise from "../components/AddExercise";
 import { QuickStartWorkoutBuilder } from "../components/ActiveWorkout";
 import Button from "../components/Button";
 import LoadingState from "../components/LoadingState";
 import SavedTemplates from "../components/SavedTemplates";
-import { getExercises } from "../utils/workoutApi";
 import {
   deleteWorkout,
   getSavedWorkouts,
@@ -19,9 +18,11 @@ import type {
   WorkoutExercise,
 } from "../utils/workoutTypes";
 
+const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const sectionStyle: React.CSSProperties = {
-  background: "#f8fbff",
-  border: "1px solid #d8e5f2",
+  background: "var(--social-bg)",
+  border: "1px solid var(--border)",
   borderRadius: "18px",
   padding: "20px",
   boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
@@ -32,18 +33,18 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "12px",
   borderRadius: "12px",
-  border: "1px solid #c8d7e6",
-  background: "#ffffff",
-  color: "#0f172a",
+  border: "1px solid var(--border)",
+  background: "var(--bg)",
+  color: "var(--text)",
   boxSizing: "border-box",
 };
 
 const tabButtonStyle = (active: boolean): React.CSSProperties => ({
   padding: "10px 18px",
   borderRadius: "999px",
-  border: active ? "1px solid #9ccbf3" : "1px solid #d2deea",
-  background: active ? "#dff0ff" : "#eef4fa",
-  color: active ? "#2b95e8" : "#4b5563",
+  border: active ? "1px solid #9ccbf3" : "1px solid var(--border)",
+  background: active ? "#dff0ff" : "var(--social-bg)",
+  color: active ? "#2b95e8" : "var(--text)",
   cursor: "pointer",
   fontWeight: 700,
 });
@@ -60,11 +61,9 @@ const headingStyle: React.CSSProperties = {
   margin: 0,
   fontSize: "56px",
   lineHeight: 1,
-  color: "#060b13",
+  color: "var(--text)",
   letterSpacing: "-1.4px",
 };
-
-const zoneOptions = ["Upper Body", "Legs", "Core", "Full Body"];
 
 //Fixed Page Setups (For easier mobile use)
 const fixedWorkoutExerciseListStyle: React.CSSProperties = {
@@ -100,7 +99,7 @@ type ActiveWorkoutStep = "session" | "exercisePicker" | "finishQuestion";
 
 const buildBodyPartLabel = (exercises: WorkoutExercise[]) => {
   if (exercises.length === 1) {
-    return exercises[0].bodyPart || "Custom";
+    return exercises[0].category || "Custom";
   }
 
   return "Custom";
@@ -125,10 +124,9 @@ const createPrefilledSet = (reps: string) => ({
 });
 
 const Workout = () => {
-  //Stores all available exercises.
-  //This comes from the temporary exercise API layer for now, will be changed to connect to API on backend later.
+  //Stores all available exercises for the current zone + search, fetched from the backend.
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
-  const [loadingExercises, setLoadingExercises] = useState(true);
+  const [loadingExercises, setLoadingExercises] = useState(false);
 
   //Search box used only on the Add Exercise page.
   const [builderSearch, setBuilderSearch] = useState("");
@@ -142,7 +140,8 @@ const Workout = () => {
   //2. workout builder page
   //3. exercise picker page
   const [builderStep, setBuilderStep] = useState<BuilderStep>("hidden");
-  const [selectedZone, setSelectedZone] = useState("Upper Body");
+  const [selectedZone, setSelectedZone] = useState("");
+  const [zoneOptions, setZoneOptions] = useState<string[]>([]);
   const [workoutName, setWorkoutName] = useState("");
   const [builderExercises, setBuilderExercises] = useState<WorkoutExercise[]>([]);
 
@@ -178,23 +177,47 @@ const Workout = () => {
     }
   };
 
-  const loadExercises = async (searchTerm = "") => {
-    setLoadingExercises(true);
+useEffect(() => {
+  fetch("/api/exercises/meta/filters")
+    .then((r) => r.json())
+    .then((data) => {
+      const muscles = data.primaryMuscles ?? [];
+      setZoneOptions(muscles);
+      if (muscles.length > 0) setSelectedZone(muscles[0]);
+    });
+}, []);
 
+  // Only one picker is open at a time, so derive the active search from the current step.
+  const activeSearch =
+    builderStep === "quickStartExercisePicker" ? quickStartSearch : builderSearch;
+
+  // Mirrors ExerciseLibrary's fetchExercises: hits the backend with category + search,
+  // reruns automatically whenever the zone or active search changes.
+  const fetchExercises = useCallback(async () => {
+    if (!selectedZone) return;
+    setLoadingExercises(true);
+    
     try {
-      const exercises = await getExercises(searchTerm);
-      setAllExercises(exercises);
+      const params = new URLSearchParams();
+      params.set("muscle", selectedZone);
+      if (activeSearch) params.set("search", activeSearch);
+      params.set("limit", "50");
+      const res = await fetch(`/api/exercises?${params}`);
+      const data = await res.json();
+      setAllExercises(data.items ?? []);
     } finally {
       setLoadingExercises(false);
     }
-  };
+  }, [selectedZone, activeSearch]);
+
+  useEffect(() => { void fetchExercises(); }, [fetchExercises]);
 
   useEffect(() => {
     const initializeWorkoutPage = async () => {
       setLoadingWorkoutPage(true);
 
       try {
-        await Promise.all([loadExercises(), refreshSavedWorkouts()]);
+        await refreshSavedWorkouts();
       } finally {
         setLoadingWorkoutPage(false);
       }
@@ -215,46 +238,6 @@ const Workout = () => {
 
   const filteredSavedWorkouts = savedWorkouts;
 
-  //Exercises shown in the current selected body zone while building a plan.
-  //Search stays on this page only so the builder page stays cleaner on mobile.
-  const zoneExercises = useMemo(() => {
-    const lowered = builderSearch.trim().toLowerCase();
-
-    return allExercises.filter((exercise) => {
-      const matchesZone =
-        (exercise.bodyPart || "").toLowerCase() === selectedZone.toLowerCase();
-
-      if (!matchesZone) return false;
-      if (!lowered) return true;
-
-      return (
-        exercise.name.toLowerCase().includes(lowered) ||
-        (exercise.category || "").toLowerCase().includes(lowered) ||
-        (exercise.bodyPart || "").toLowerCase().includes(lowered) ||
-        (exercise.equipment || "").toLowerCase().includes(lowered)
-      );
-    });
-  }, [allExercises, selectedZone, builderSearch]);
-
-  //This is a note: Quick Start uses its own picker search but keeps the same body zone buttons.
-  const quickStartZoneExercises = useMemo(() => {
-    const lowered = quickStartSearch.trim().toLowerCase();
-
-    return allExercises.filter((exercise) => {
-      const matchesZone =
-        (exercise.bodyPart || "").toLowerCase() === selectedZone.toLowerCase();
-
-      if (!matchesZone) return false;
-      if (!lowered) return true;
-
-      return (
-        exercise.name.toLowerCase().includes(lowered) ||
-        (exercise.category || "").toLowerCase().includes(lowered) ||
-        (exercise.bodyPart || "").toLowerCase().includes(lowered) ||
-        (exercise.equipment || "").toLowerCase().includes(lowered)
-      );
-    });
-  }, [allExercises, quickStartSearch, selectedZone]);
 
   const addExerciseToWorkoutPlan = (exercise: Exercise) => {
     const exerciseId =
@@ -301,7 +284,7 @@ const Workout = () => {
   //Starts the create plan flow on a dedicated naming page first.
   const handleCreateNewWorkout = () => {
     setWorkoutName("");
-    setSelectedZone("Upper Body");
+    setSelectedZone(zoneOptions[0] ?? "");
     setBuilderSearch("");
     setBuilderExercises([]);
     setBuilderStep("name");
@@ -320,7 +303,7 @@ const Workout = () => {
   const handleCloseBuilder = () => {
     setBuilderStep("hidden");
     setWorkoutName("");
-    setSelectedZone("Upper Body");
+    setSelectedZone(zoneOptions[0] ?? "");
     setBuilderSearch("");
     setBuilderExercises([]);
   };
@@ -349,7 +332,7 @@ const Workout = () => {
       await saveWorkout(newWorkout);
       await refreshSavedWorkouts();
       setWorkoutName("");
-      setSelectedZone("Upper Body");
+      setSelectedZone(zoneOptions[0] ?? "");
       setBuilderSearch("");
       setBuilderExercises([]);
       setBuilderStep("hidden");
@@ -584,7 +567,7 @@ const Workout = () => {
     setQuickStartExercises([]);
     setQuickStartLogs([]);
     setQuickStartSearch("");
-    setSelectedZone("Upper Body");
+    setSelectedZone(zoneOptions[0] ?? "");
     setBuilderStep("hidden");
     setQuickStartPlanName("");
     resetWorkoutInputs();
@@ -596,7 +579,7 @@ const Workout = () => {
     setQuickStartExercises([]);
     setQuickStartLogs([]);
     setQuickStartSearch("");
-    setSelectedZone("Upper Body");
+    setSelectedZone(zoneOptions[0] ?? "");
     setBuilderStep("quickStartBuilder");
     resetWorkoutInputs();
     setElapsedSeconds(0);
@@ -803,7 +786,7 @@ const Workout = () => {
         searchValue={builderSearch}
         onSearchChange={setBuilderSearch}
         loadingExercises={loadingExercises}
-        exercises={zoneExercises}
+        exercises={allExercises}
         zoneOptions={zoneOptions}
         selectedZone={selectedZone}
         onSelectZone={handleSelectZone}
@@ -963,7 +946,7 @@ const Workout = () => {
                             {exercise.name}
                           </strong>
                           <p style={{ margin: "6px 0 0 0" }}>
-                            <strong>Body Area:</strong> {exercise.bodyPart || "N/A"}
+                            <strong>Body Part:</strong>{" "}{exercise.bodyPart || "N/A"}
                           </p>
                         </div>
 
@@ -1078,7 +1061,7 @@ const Workout = () => {
                     style={tabButtonStyle(selectedZone === zone)}
                     onClick={() => handleSelectZone(zone)}
                   >
-                    {zone}
+                    {Cap(zone)}
                   </button>
                 ))}
               </div>
@@ -1097,20 +1080,19 @@ const Workout = () => {
             <div style={fixedExercisePickerBoxStyle}>
               {loadingExercises ? (
                 <p>Loading exercises...</p>
-              ) : zoneExercises.length === 0 ? (
+              ) : allExercises.length === 0 ? (
                 <p>No exercises found in this body zone.</p>
               ) : (
                 <div style={{ display: "grid", gap: "10px" }}>
-                  {zoneExercises.map((exercise) => {
+                  {allExercises.map((exercise) => {
+                    const exerciseId = exercise._id || exercise.id || exercise.datasetId || exercise.name;
                     const alreadyAdded = builderExercises.some(
-                      (item) =>
-                        item.exerciseId ===
-                        (exercise._id || exercise.id || exercise.datasetId || exercise.name)
+                      (item) => item.exerciseId === exerciseId
                     );
 
                     return (
                       <div
-                        key={exercise._id || exercise.id || exercise.datasetId || exercise.name}
+                        key={exerciseId}
                         style={{
                           border: "1px solid var(--border)",
                           borderRadius: "12px",
@@ -1132,7 +1114,7 @@ const Workout = () => {
                               {exercise.name}
                             </h3>
                             <p style={{ margin: "0 0 4px 0" }}>
-                              <strong>Body Area:</strong> {exercise.bodyPart || "N/A"}
+                            <strong>Body Part:</strong>{" "}{exercise.bodyPart || "N/A"}
                             </p>
                             <p style={{ margin: 0 }}>
                               <strong>Equipment:</strong> {exercise.equipment || "N/A"}
@@ -1169,6 +1151,7 @@ const Workout = () => {
       </div>
     );
   }
+
  //QUICK START WORKOUT BUILDER PAGE
   if (builderStep === "quickStartBuilder") {
     return (
@@ -1207,7 +1190,7 @@ const Workout = () => {
         searchValue={quickStartSearch}
         onSearchChange={setQuickStartSearch}
         loadingExercises={loadingExercises}
-        exercises={quickStartZoneExercises}
+        exercises={allExercises}
         zoneOptions={zoneOptions}
         selectedZone={selectedZone}
         onSelectZone={handleSelectZone}
