@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import LoadingState from "../components/LoadingState";
 import "../App.css"
+import ExerciseDetailModal from "../components/ExerciseDetails";
 
 interface Exercise {
   _id: string;
@@ -166,67 +167,7 @@ const ExerciseLibrary = () => {
       </div>
 
       {/* detail modal */}
-      {selected && (
-        <div className="ex-lib-overlay" onClick={() => setSelected(null)}>
-          <div className="ex-lib-modal" onClick={(e) => e.stopPropagation()}>
-
-            <div className="ex-lib-modal__header">
-              <h3 className="ex-lib-modal__title">{selected.name}</h3>
-              <button
-                className="ex-lib-modal__close"
-                onClick={() => setSelected(null)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "4px" }}>
-              {selected.level    && <span className="ex-lib-chip">{selected.level}</span>}
-              {selected.category && <span className="ex-lib-chip">{selected.category}</span>}
-              {selected.force    && <span className="ex-lib-chip">{selected.force}</span>}
-              {selected.mechanic && <span className="ex-lib-chip">{selected.mechanic}</span>}
-            </div>
-
-            {/* information modal */}
-            <div className="ex-lib-modal__info">
-              <div>
-                <p className="ex-lib-modal__info-label">Equipment</p>
-                <p className="ex-lib-modal__info-value">{selected.equipment ?? "None"}</p>
-              </div>
-              <div>
-                <p className="ex-lib-modal__info-label">Primary muscles</p>
-                <p className="ex-lib-modal__info-value">
-                  {selected.primaryMuscles.join(", ") || "—"}
-                </p>
-              </div>
-              {selected.secondaryMuscles.length > 0 && (
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <p className="ex-lib-modal__info-label">Secondary muscles</p>
-                  <p className="ex-lib-modal__info-value">
-                    {selected.secondaryMuscles.join(", ")}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* instructions */}
-            {selected.instructions.length > 0 && (
-              <>
-                <p className="ex-lib-modal__steps-label">Instructions</p>
-                <ol className="ex-lib-modal__steps">
-                  {selected.instructions.map((step, i) => (
-                    <li key={i} className="ex-lib-modal__step">
-                      <span className="ex-lib-modal__step-num">{i + 1}</span>
-                      <span className="ex-lib-modal__step-text">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {selected && <ExerciseDetailModal exercise={selected} onClose={() => setSelected(null)} />}
     </>
   );
 };
