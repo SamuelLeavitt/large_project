@@ -1,10 +1,14 @@
 import Button from "./Button";
 import LoadingState from "./LoadingState";
 import type { Exercise } from "../utils/workoutTypes";
+import { useState } from "react";
+import ExerciseDetailModal from "./ExerciseDetails";
+
+const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const sectionStyle: React.CSSProperties = {
-  background: "#f8fbff",
-  border: "1px solid #d8e5f2",
+  background: "var(--social-bg)",
+  border: "1px solid var(--border)",
   borderRadius: "18px",
   padding: "20px",
   boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
@@ -54,6 +58,7 @@ const AddExercise = ({
   cancelLabel,
   cancelVariant = "secondary",
 }: AddExerciseProps) => {
+  const [selected, setSelected] = useState<Exercise | null>(null);
   return (
     <div
       style={{
@@ -81,15 +86,15 @@ const AddExercise = ({
                   style={{
                     padding: "10px 18px",
                     borderRadius: "999px",
-                    border: selectedZone === zone ? "1px solid #9ccbf3" : "1px solid #d2deea",
-                    background: selectedZone === zone ? "#dff0ff" : "#eef4fa",
-                    color: selectedZone === zone ? "#2b95e8" : "#4b5563",
+                    border: selectedZone === zone ? "1px solid #9ccbf3" : "1px solid var(--border)",
+                    background: selectedZone === zone ? "#dff0ff" : "var(--social-bg)",
+                    color: selectedZone === zone ? "#2b95e8" : "var(--text)",
                     cursor: "pointer",
                     fontWeight: 700,
                   }}
                   onClick={() => onSelectZone(zone)}
                 >
-                  {zone}
+                  {Cap(zone)}
                 </button>
               ))}
             </div>
@@ -105,9 +110,9 @@ const AddExercise = ({
                 width: "100%",
                 padding: "12px",
                 borderRadius: "12px",
-                border: "1px solid #c8d7e6",
-                background: "#ffffff",
-                color: "#0f172a",
+                border: "1px solid var(--border)",
+                background: "var(--bg)",
+                color: "var(--text)",
                 boxSizing: "border-box",
               }}
             />
@@ -152,13 +157,17 @@ const AddExercise = ({
                             {exercise.name}
                           </h3>
                           <p style={{ margin: "0 0 4px 0" }}>
-                            <strong>Body Area:</strong> {exercise.bodyPart || "N/A"}
+                            <strong>Body Zone:</strong> {exercise.primaryMuscles?.length ? Cap(exercise.primaryMuscles.join(", ")) : "N/A"}
                           </p>
                           <p style={{ margin: 0 }}>
-                            <strong>Equipment:</strong> {exercise.equipment || "N/A"}
+                            <strong>Equipment:</strong> {exercise.equipment ? Cap(exercise.equipment) : "N/A"}
                           </p>
                         </div>
-
+                        <Button
+                          label="Details"
+                          variant="secondary"
+                          onClick={() => setSelected(exercise)}
+                        />
                         <Button
                           label={alreadyAdded ? "Added" : "Add"}
                           variant="primary"
@@ -177,6 +186,12 @@ const AddExercise = ({
           </div>
         </div>
       </div>
+      {selected && (
+        <ExerciseDetailModal
+          exercise={selected}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   );
 };

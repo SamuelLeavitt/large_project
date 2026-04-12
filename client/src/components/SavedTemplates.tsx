@@ -2,8 +2,8 @@ import Button from "./Button";
 import type { SavedWorkout } from "../utils/workoutTypes";
 
 const sectionStyle: React.CSSProperties = {
-  background: "#f8fbff",
-  border: "1px solid #d8e5f2",
+  background: "var(--social-bg)",
+  border: "1px solid var(--border)",
   borderRadius: "18px",
   padding: "20px",
   boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
@@ -48,10 +48,10 @@ const SavedTemplates = ({
                 <div
                   key={workout.id}
                   style={{
-                    border: "1px solid #d1e1ef",
+                    border: "1px solid var(--border)",
                     borderRadius: "16px",
                     padding: "14px",
-                    background: "#ffffff",
+                    background: "var(--bg)",
                   }}
                 >
                   <div
@@ -94,7 +94,7 @@ const SavedTemplates = ({
                         style={{
                           padding: "10px",
                           borderRadius: "10px",
-                          background: "#f3f8fd",
+                          background: "var(--social-bg)",
                         }}
                       >
                         <strong>{exercise.name}</strong>
