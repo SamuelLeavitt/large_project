@@ -88,8 +88,8 @@ const ActiveWorkout = ({
     >
       <div
         style={{
-          background: "#f8fbff",
-          border: "1px solid #d8e5f2",
+          background: "var(--social-bg)",
+          border: "1px solid var(--border)",
           borderRadius: "18px",
           padding: "20px",
           boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
@@ -112,7 +112,7 @@ const ActiveWorkout = ({
             <h1 style={{ margin: 0, fontSize: "48px", lineHeight: 1.05, wordBreak: "break-word" }}>
               {activeWorkout.name}
             </h1>
-            <p style={{ marginTop: "12px", color: "#5b6778" }}>
+            <p style={{ marginTop: "12px", color: "var(--text)",}}>
               Exercise {activeExerciseIndex + 1} of {activeWorkout.exercises.length}
             </p>
           </div>
@@ -127,8 +127,8 @@ const ActiveWorkout = ({
 
       <div
         style={{
-          background: "#f8fbff",
-          border: "1px solid #d8e5f2",
+          background: "var(--social-bg)",
+          border: "1px solid var(--border)",
           borderRadius: "18px",
           padding: "20px",
           boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
@@ -159,9 +159,9 @@ const ActiveWorkout = ({
                 width: "100%",
                 padding: "12px",
                 borderRadius: "12px",
-                border: "1px solid #c8d7e6",
-                background: "#ffffff",
-                color: "#0f172a",
+                border: "1px solid var(--border)",
+                background: "var(--bg)",
+                color: "var(--text)",
                 boxSizing: "border-box",
               }}
             />
@@ -178,9 +178,9 @@ const ActiveWorkout = ({
                 width: "100%",
                 padding: "12px",
                 borderRadius: "12px",
-                border: "1px solid #c8d7e6",
-                background: "#ffffff",
-                color: "#0f172a",
+                border: "1px solid var(--border)",
+                background: "var(--bg)",
+                color: "var(--text)",
                 boxSizing: "border-box",
               }}
             />
@@ -219,8 +219,8 @@ const ActiveWorkout = ({
                     style={{
                       padding: "12px",
                       borderRadius: "12px",
-                      border: "1px solid #d6e4f2",
-                      background: "#ffffff",
+                      border: "1px solid var(--border)",
+                      background: "var(--bg)",
                     }}
                   >
                     Set {index + 1}: {set.weight} lbs x {set.reps} reps
@@ -255,8 +255,8 @@ const ActiveWorkout = ({
 
       <div
         style={{
-          background: "#f8fbff",
-          border: "1px solid #d8e5f2",
+          background: "var(--social-bg)",
+          border: "1px solid var(--border)",
           borderRadius: "18px",
           padding: "20px",
           boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
@@ -309,7 +309,7 @@ export const QuickStartWorkoutBuilder = ({
   disableFinishWorkout = false,
 }: QuickStartWorkoutBuilderProps) => {
   const quickStartCardClassName =
-    "w-full rounded-[18px] border border-[#d8e5f2] bg-[#f8fbff] p-5 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]";
+    "w-full rounded-[18px] border border-[var(--border)] bg-[var(--social-bg)] p-5 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]";
 
   return (
     <div className="mx-auto grid w-full max-w-[980px] justify-items-stretch gap-6 p-6">
@@ -327,9 +327,9 @@ export const QuickStartWorkoutBuilder = ({
             width: "100%",
             padding: "12px",
             borderRadius: "12px",
-            border: "1px solid #c8d7e6",
-            background: "#ffffff",
-            color: "#0f172a",
+            border: "1px solid var(--border)",
+            background: "var(--bg)",
+            color: "var(--text)",
             boxSizing: "border-box",
             cursor: quickStartNameEditable ? "text" : "default",
           }}
@@ -380,10 +380,10 @@ export const QuickStartWorkoutBuilder = ({
                 <div
                   key={`${exercise.exerciseId}-${index}`}
                   style={{
-                    border: "1px solid #d8e5f2",
+                    border: "1px solid var(--border)",
                     borderRadius: "14px",
                     padding: "16px",
-                    background: "#ffffff",
+                    background: "var(--bg)",
                     transition: "all 0.2s ease",
                   }}
                 >
@@ -408,7 +408,7 @@ export const QuickStartWorkoutBuilder = ({
                     ) : null}
                   </div>
 
-                  <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: "1px solid #d8e5f2" }}>
+                  <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: "1px solid var(--border)", }}>
                     <div style={{ display: "grid", gap: "10px" }}>
                       {loggedSets.map((set, setIndex) => (
                         <div
@@ -420,8 +420,8 @@ export const QuickStartWorkoutBuilder = ({
                             alignItems: "center",
                             padding: "10px 12px",
                             borderRadius: "10px",
-                            border: "1px solid #d8e5f2",
-                            background: "#f8fbff",
+                            background: "var(--social-bg)",
+                            border: "1px solid var(--border)",      
                           }}
                         >
                           <strong>#{setIndex + 1}</strong>
@@ -434,9 +434,9 @@ export const QuickStartWorkoutBuilder = ({
                               width: "100%",
                               padding: "10px",
                               borderRadius: "10px",
-                              border: "1px solid #c8d7e6",
-                              background: "#ffffff",
-                              color: "#0f172a",
+                              border: "1px solid var(--border)",
+                              background: "var(--bg)",
+                              color: "var(--text)",
                               boxSizing: "border-box",
                             }}
                           />
@@ -449,9 +449,9 @@ export const QuickStartWorkoutBuilder = ({
                               width: "100%",
                               padding: "10px",
                               borderRadius: "10px",
-                              border: "1px solid #c8d7e6",
-                              background: "#ffffff",
-                              color: "#0f172a",
+                              border: "1px solid var(--border)",
+                              background: "var(--bg)",
+                              color: "var(--text)",
                               boxSizing: "border-box",
                             }}
                           />
