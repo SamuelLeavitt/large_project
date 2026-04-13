@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 
 // Import pages
-import Home from './pages/Home';
-import Profile from './pages/Profile';
+// import Home from './pages/Home';
+// import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Workout from './pages/Workout';

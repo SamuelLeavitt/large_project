@@ -4,6 +4,7 @@ import ThemeToggle from "./ThemeToggle";
 import Button from "./Button";
 import SearchBar from "./SearchBar";
 import "../App.css"
+import Logo from "./Logo";
 
 
 interface NavbarProps {
@@ -99,10 +100,8 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
         }}>
 
             {/*Left side of Navbar: Title*/}
-            <strong style={{
-                fontSize: '1.2rem',
-                minWidth: 'fit-content'
-            }}> Workout Planner</strong>
+            {/*Logo component is added here */}
+            <Logo />
 
             {/*Center of Navbar: Search Bar (Only shows if logged in)*/}
             <div className="navbar__desktop-search" style={{
