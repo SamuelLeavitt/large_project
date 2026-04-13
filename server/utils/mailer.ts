@@ -16,7 +16,7 @@ async function sendViaResendApi(options: {
   }
 
   if (!from) {
-    console.error("[auth-email] No MAIN_FROM env variable configured);
+    console.error("[auth-email] No MAIN_FROM env variable configured");
     return false;
   }
 
