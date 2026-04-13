@@ -17,6 +17,7 @@ import type {
   SavedWorkout,
   WorkoutExercise,
 } from "../utils/workoutTypes";
+import MuscleMapFront from "../components/MuscleMapFront";
 
 const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -177,15 +178,15 @@ const Workout = () => {
     }
   };
 
-useEffect(() => {
-  fetch("/api/exercises/meta/filters")
-    .then((r) => r.json())
-    .then((data) => {
-      const muscles = data.primaryMuscles ?? [];
-      setZoneOptions(muscles);
-      if (muscles.length > 0) setSelectedZone(muscles[0]);
-    });
-}, []);
+  useEffect(() => {
+    fetch("/api/exercises/meta/filters")
+      .then((r) => r.json())
+      .then((data) => {
+        const muscles = data.primaryMuscles ?? [];
+        setZoneOptions(muscles);
+        if (muscles.length > 0) setSelectedZone(muscles[0]);
+      });
+  }, []);
 
   // Only one picker is open at a time, so derive the active search from the current step.
   const activeSearch =
@@ -196,7 +197,6 @@ useEffect(() => {
   const fetchExercises = useCallback(async () => {
     if (!selectedZone) return;
     setLoadingExercises(true);
-    
     try {
       const params = new URLSearchParams();
       params.set("muscle", selectedZone);
@@ -386,12 +386,12 @@ useEffect(() => {
       prev.map((exercise, index) =>
         index === exerciseIndex
           ? {
-              ...exercise,
-              sets: [
-                ...exercise.sets,
-                createPrefilledSet(activeWorkoutExercises[exerciseIndex]?.reps || "0"),
-              ],
-            }
+            ...exercise,
+            sets: [
+              ...exercise.sets,
+              createPrefilledSet(activeWorkoutExercises[exerciseIndex]?.reps || "0"),
+            ],
+          }
           : exercise
       )
     );
@@ -808,7 +808,7 @@ useEffect(() => {
     return (
       <QuickStartWorkoutBuilder
         quickStartName={activeWorkout.name}
-        onQuickStartNameChange={() => {}}
+        onQuickStartNameChange={() => { }}
         quickStartNameEditable={false}
         quickStartExercises={activeWorkoutExercises}
         quickStartLogs={activeLogs}
@@ -1051,6 +1051,12 @@ useEffect(() => {
 
         <div style={sectionStyle}>
           <div style={{ display: "grid", gap: "18px" }}>
+
+            {/* Code for Muscle Map */}
+            <div style={{ marginBottom: "20px" }}>
+              <MuscleMapFront onZoneClick={handleSelectZone} />
+            </div>
+
             <div>
               <h3 style={{ marginBottom: "10px" }}>Choose a Body Zone</h3>
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -1114,7 +1120,7 @@ useEffect(() => {
                               {exercise.name}
                             </h3>
                             <p style={{ margin: "0 0 4px 0" }}>
-                            <strong>Body Part:</strong>{" "}{exercise.bodyPart || "N/A"}
+                              <strong>Body Part:</strong>{" "}{exercise.bodyPart || "N/A"}
                             </p>
                             <p style={{ margin: 0 }}>
                               <strong>Equipment:</strong> {exercise.equipment || "N/A"}
@@ -1152,7 +1158,7 @@ useEffect(() => {
     );
   }
 
- //QUICK START WORKOUT BUILDER PAGE
+  //QUICK START WORKOUT BUILDER PAGE
   if (builderStep === "quickStartBuilder") {
     return (
       <QuickStartWorkoutBuilder
@@ -1180,7 +1186,7 @@ useEffect(() => {
     );
   }
 
- 
+
   //QUICK START ADD EXERCISE PAGE
   if (builderStep === "quickStartExercisePicker") {
     return (
@@ -1270,19 +1276,19 @@ useEffect(() => {
         <h1 style={headingStyle}> Workout</h1>
 
       </div>
-            <Button
-              label = "Start an Empty Workout"
-              onClick={handleStartBlankQuickStart}
-            />
+      <Button
+        label="Start an Empty Workout"
+        onClick={handleStartBlankQuickStart}
+      />
 
-        <SavedTemplates
-          filteredSavedWorkouts={filteredSavedWorkouts}
-          onCreateTemplate={handleCreateNewWorkout}
-          onStartWorkout={handleStartWorkout}
-          onDeleteWorkoutPlan={(workoutId) => {
-            void handleDeleteWorkoutPlan(workoutId);
-          }}
-        />
+      <SavedTemplates
+        filteredSavedWorkouts={filteredSavedWorkouts}
+        onCreateTemplate={handleCreateNewWorkout}
+        onStartWorkout={handleStartWorkout}
+        onDeleteWorkoutPlan={(workoutId) => {
+          void handleDeleteWorkoutPlan(workoutId);
+        }}
+      />
 
     </div>
   );
