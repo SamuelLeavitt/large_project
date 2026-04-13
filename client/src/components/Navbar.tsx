@@ -1,5 +1,5 @@
-import { Link, useNavigate, useLocation  } from "react-router-dom";
-import { useState, useEffect } from "react";      
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
 import Button from "./Button";
 import SearchBar from "./SearchBar";
@@ -14,8 +14,9 @@ interface NavbarProps {
 
 const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
     const navigate = useNavigate(); // Initializes the useNavigate hook to navigate between routes.
-    
+
     const location = useLocation();
+
     const [menuOpen, setMenuOpen] = useState(false);
     useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
@@ -101,19 +102,19 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
             <strong style={{
                 fontSize: '1.2rem',
                 minWidth: 'fit-content'
-            }}> Workout App</strong>
+            }}> Workout Planner</strong>
 
             {/*Center of Navbar: Search Bar (Only shows if logged in)*/}
             <div className="navbar__desktop-search" style={{
-                    flex: 1,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    padding: '0 20px',
-                    minWidth: 0,
-                    overflow: 'hidden'
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '0 20px',
+                minWidth: 0,
+                overflow: 'hidden'
             }}>
                 {isLoggedIn && (
-                    <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'center'   }}>
+                    <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'center' }}>
                         <SearchBar />
                     </div>
                 )}
@@ -135,24 +136,34 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                 {isLoggedIn ? (
                     <>
 
-                        <Link to="/" style={{ textDecoration: 'none' }}>
+                        {/* <Link to="/" style={{ textDecoration: 'none' }}>
                             <Button label="Home" variant="secondary" onClick={() => { }} />
-                        </Link>
+                        </Link> */}
 
-                        <Link to="/profile" style={{ textDecoration: 'none' }}>
+                        {/*Button for workout page hides itself when on the workout page */}
+                        {location.pathname !== "/workout" && (
+                            <Link to="/workout" style={{ textDecoration: 'none' }}>
+                                <Button label="Workout" variant="secondary" onClick={() => { }} />
+                            </Link>
+                        )}
+
+                        {/*Button for exercise page hides itself when on the exercise page */}
+                        {location.pathname !== "/exercises" && (
+                            <Link to="/exercises" style={{ textDecoration: 'none' }}>
+                                <Button label="Exercises" variant="secondary" onClick={() => { }} />
+                            </Link>
+                        )}
+
+                        {/* <Link to="/profile" style={{ textDecoration: 'none' }}>
                             <Button label="Profile" variant="secondary" onClick={() => { }} />
-                        </Link>
+                        </Link> */}
 
-                        <Link to="/workout" style={{ textDecoration: 'none' }}>
-                            <Button label="Workout" variant="secondary" onClick={() => { }} />
-                        </Link>
-                        <Link to="/workout-history" style={{ textDecoration: 'none' }}>
-                            <Button label="History" variant="secondary" onClick={() => { }} />
-                        </Link>
-
-                        <Link to="/exercises" style={{ textDecoration: 'none' }}>
-                            <Button label="Exercises" variant="secondary" onClick={() => {}} />
-                        </Link>
+                        {/*Button for workout-history page hides itself when on the workout-history page */}
+                        {location.pathname !== "/workout-history" && (
+                            <Link to="/workout-history" style={{ textDecoration: 'none' }}>
+                                <Button label="History" variant="secondary" onClick={() => { }} />
+                            </Link>
+                        )}
 
                         <Button label="Logout" variant="danger" onClick={handleLogout} />
                     </>
@@ -160,12 +171,17 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
 
                     <>
 
-                        <Link to="/login" style={{ textDecoration: 'none' }}>
-                            <Button label="Login" variant="secondary" onClick={() => { }} />
-                        </Link>
-                        <Link to="/register" style={{ textDecoration: 'none' }}>
-                            <Button label="Register" variant="secondary" onClick={() => { }} />
-                        </Link>
+                        {location.pathname !== "/login" && (
+                            <Link to="/login" style={{ textDecoration: 'none' }}>
+                                <Button label="Login" variant="secondary" onClick={() => { }} />
+                            </Link>
+                        )}
+
+                        {location.pathname !== "/register" && (
+                            <Link to="/register" style={{ textDecoration: 'none' }}>
+                                <Button label="Register" variant="secondary" onClick={() => { }} />
+                            </Link>
+                        )}
                     </>
                 )}
 
@@ -174,40 +190,56 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                 </div>
 
             </div>
-                {/* expandable navigation button for mobile*/}
-                <button
-                    className={`navbar__hamburger${menuOpen ? ' open' : ''}`}
-                    onClick={() => setMenuOpen(o => !o)}
-                    aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                >
-                    <span /><span /><span />
-                </button>
+            {/* expandable navigation button for mobile*/}
+            <button
+                className={`navbar__hamburger${menuOpen ? ' open' : ''}`}
+                onClick={() => setMenuOpen(o => !o)}
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            >
+                <span /><span /><span />
+            </button>
         </nav>
         {/* mobile drawer */}
         <div className={`navbar__drawer${menuOpen ? ' open' : ''}`}>
-                <div className="navbar__drawer-inner">
-                    {isLoggedIn && <SearchBar />}
-                    {isLoggedIn ? (
-                        <>
-                            <Link to="/">               <Button label="Home"      variant="secondary" onClick={() => {}} /></Link>
-                            <Link to="/profile">        <Button label="Profile"   variant="secondary" onClick={() => {}} /></Link>
-                            <Link to="/workout">        <Button label="Workout"   variant="secondary" onClick={() => {}} /></Link>
-                            <Link to="/workout-history"><Button label="History"   variant="secondary" onClick={() => {}} /></Link>
-                            <Link to="/exercises">      <Button label="Exercises" variant="secondary" onClick={() => {}} /></Link>
-                            <hr className="navbar__drawer-divider" />
-                            <Button label="Logout" variant="danger" onClick={handleLogout} />
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login">   <Button label="Login"    variant="secondary" onClick={() => {}} /></Link>
-                            <Link to="/register"><Button label="Register" variant="secondary" onClick={() => {}} /></Link>
-                        </>
-                    )}
-                    <hr className="navbar__drawer-divider" />
-                    <ThemeToggle />
-                </div>
-            </div>       
-        </> 
+            <div className="navbar__drawer-inner">
+                {isLoggedIn && <SearchBar />}
+                {isLoggedIn ? (
+                    <>
+                        {/* <Link to="/">               <Button label="Home" variant="secondary" onClick={() => { }} /></Link> */}
+                        {/* <Link to="/profile">        <Button label="Profile" variant="secondary" onClick={() => { }} /></Link> */}
+
+                        {location.pathname !== "/workout" && (
+                            <Link to="/workout">        <Button label="Workout" variant="secondary" onClick={() => { }} /></Link>
+                        )}
+
+                        {location.pathname !== "/workout-history" && (
+                            <Link to="/workout-history"><Button label="History" variant="secondary" onClick={() => { }} /></Link>
+                        )}
+
+                        {location.pathname !== "/exercises" && (
+                            <Link to="/exercises">      <Button label="Exercises" variant="secondary" onClick={() => { }} /></Link>
+                        )}
+
+                        <hr className="navbar__drawer-divider" />
+
+                        <Button label="Logout" variant="danger" onClick={handleLogout} />
+                    </>
+                ) : (
+                    <>
+                        {location.pathname !== "/login" && (
+                            <Link to="/login">   <Button label="Login" variant="secondary" onClick={() => { }} /></Link>
+                        )}
+
+                        {location.pathname !== "/register" && (
+                            <Link to="/register"><Button label="Register" variant="secondary" onClick={() => { }} /></Link>
+                        )}
+                    </>
+                )}
+                <hr className="navbar__drawer-divider" />
+                <ThemeToggle />
+            </div>
+        </div>
+    </>
     );
 };
 
