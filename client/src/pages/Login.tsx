@@ -51,7 +51,7 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
             if (data.token) localStorage.setItem("token", data.token);
             setIsLoggedIn(true);
             navigate('/');
-        } catch (err) {
+        } catch {
             setError("Network error during login.");
         } finally {
             setLoading(false);
