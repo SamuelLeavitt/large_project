@@ -49,17 +49,17 @@ const Button = ({ label, onClick, variant = 'primary', fullWidth = false, disabl
         secondary: {
             backgroundColor: 'var(--social-bg)',
             color: 'var(--text)',
-            border: '2px solid transparent',
+            border: "1.5px solid var(--border)",
         },
         danger: {
             backgroundColor: 'var(--accent-bg)',
             color: '#e05c4b',
-            border: '2px solid transparent',
+            border: "1.5px solid var(--border)",
         },
         start: {
             backgroundColor: 'var(--accent-bg)',
             color: '#3db87a',
-            border: '2px solid transparent',
+            border: "1.5px solid var(--border)",
         },
     };
 

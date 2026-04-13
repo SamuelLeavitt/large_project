@@ -3,6 +3,7 @@ import LoadingState from "./LoadingState";
 import type { Exercise } from "../utils/workoutTypes";
 import { useState } from "react";
 import ExerciseDetailModal from "./ExerciseDetails";
+import MuscleMapFront from "./MuscleMapFront";
 
 const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -40,6 +41,7 @@ interface AddExerciseProps {
   onCancel: () => void;
   cancelLabel: string;
   cancelVariant?: "secondary" | "danger" | "primary";
+  extraActions?: React.ReactNode; 
 }
 
 const AddExercise = ({
@@ -57,8 +59,14 @@ const AddExercise = ({
   onCancel,
   cancelLabel,
   cancelVariant = "secondary",
+  extraActions,
 }: AddExerciseProps) => {
   const [selected, setSelected] = useState<Exercise | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const handleZonePick = (zone: string) => {             // ← new
+    onSelectZone(zone);
+    setShowMap(false);
+  };
   return (
     <div
       style={{
@@ -95,7 +103,7 @@ const AddExercise = ({
                 backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "right 14px center",
-                minWidth: "200px",
+                minWidth: "150px",
               }}
             >
               {zoneOptions.map((zone) => (
@@ -104,6 +112,14 @@ const AddExercise = ({
                 </option>
               ))}
             </select>
+          <div style={{ marginTop: "10px", display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              label="Find a Muscle"
+              variant="secondary"
+              onClick={() => setShowMap(true)}
+            />
+          </div>
+
           </div>
 
           <div>
@@ -189,9 +205,49 @@ const AddExercise = ({
 
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <Button label={cancelLabel} variant={cancelVariant} onClick={onCancel} />
+            {extraActions}
           </div>
         </div>
       </div>
+      {showMap && (
+        <div
+          onClick={() => setShowMap(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}   // prevent backdrop click from closing when clicking inside
+            style={{
+              background: "var(--bg)",
+              border: "1px solid var(--border)",
+              borderRadius: "18px",
+              padding: "24px",
+              width: "min(500px, 90vw)",
+              maxHeight: "85vh",
+              overflowY: "auto",
+              display: "grid",
+              gap: "16px",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2 style={{ margin: 0 }}>Pick a Muscle Group</h2>
+              <Button label="Close" variant="secondary" onClick={() => setShowMap(false)} />
+            </div>
+            <p style={{ margin: 0, color: "var(--text-muted)" }}>
+              Click a muscle to filter exercises.
+            </p>
+            <MuscleMapFront onZoneClick={handleZonePick} />  {/* closes on selection */}
+          </div>
+        </div>
+      )}
+      
       {selected && (
         <ExerciseDetailModal
           exercise={selected}

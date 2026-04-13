@@ -17,9 +17,7 @@ import type {
   SavedWorkout,
   WorkoutExercise,
 } from "../utils/workoutTypes";
-import MuscleMapFront from "../components/MuscleMapFront";
 
-const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const sectionStyle: React.CSSProperties = {
   background: "var(--social-bg)",
@@ -39,16 +37,6 @@ const inputStyle: React.CSSProperties = {
   color: "var(--text)",
   boxSizing: "border-box",
 };
-
-const tabButtonStyle = (active: boolean): React.CSSProperties => ({
-  padding: "10px 18px",
-  borderRadius: "999px",
-  border: active ? "1px solid #9ccbf3" : "1px solid var(--border)",
-  background: active ? "#dff0ff" : "var(--social-bg)",
-  color: active ? "#2b95e8" : "var(--text)",
-  cursor: "pointer",
-  fontWeight: 700,
-});
 
 const shellStyle: React.CSSProperties = {
   maxWidth: "1180px",
@@ -74,16 +62,6 @@ const fixedWorkoutExerciseListStyle: React.CSSProperties = {
   background: "var(--bg)",
   minHeight: "364px",
   maxHeight: "728px",
-  overflowY: "auto",
-};
-
-const fixedExercisePickerBoxStyle: React.CSSProperties = {
-  border: "1px solid var(--border)",
-  borderRadius: "14px",
-  padding: "12px",
-  background: "var(--bg)",
-  minHeight: "360px",
-  maxHeight: "360px",
   overflowY: "auto",
 };
 
@@ -873,8 +851,8 @@ const Workout = () => {
                 disabled={!workoutName.trim()}
               />
               <Button
-                label="Cancel New Workout"
-                variant="secondary"
+                label="Cancel"
+                variant="danger"
                 onClick={handleCloseBuilder}
               />
             </div>
@@ -998,28 +976,30 @@ const Workout = () => {
                           />
                         </div>
                       </div>
+                    
                     </div>
+                  
                   ))}
                 </div>
               </div>
             )}
-
+            <Button
+              label="Add Exercise"
+              variant="secondary"
+              onClick={handleOpenExercisePicker}
+            />                    
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Button
-                label="Add Exercise"
-                variant="primary"
-                onClick={handleOpenExercisePicker}
-              />
+              
               <Button
                 label="Save Workout"
-                variant="primary"
+                variant="secondary"
                 onClick={() => {
                   void handleSaveWorkoutPlan();
                 }}
                 disabled={!workoutName.trim() || builderExercises.length === 0}
               />
               <Button
-                label="Cancel New Workout"
+                label="Cancel"
                 variant="secondary"
                 onClick={handleCloseBuilder}
               />
@@ -1033,129 +1013,42 @@ const Workout = () => {
   //ADD EXERCISE PAGE
   if (builderStep === "exercisePicker") {
     return (
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "24px",
-          display: "grid",
-          gap: "24px",
-        }}
-      >
-        <div>
-          <h1>Add Exercise</h1>
-          <p>
-            Choose a body zone or search for exercises to add to your workout plan.
-          </p>
-        </div>
-
-        <div style={sectionStyle}>
-          <div style={{ display: "grid", gap: "18px" }}>
-
-            {/* Code for Muscle Map */}
-            <div style={{ marginBottom: "20px" }}>
-              <MuscleMapFront onZoneClick={handleSelectZone} />
-            </div>
-
-            <div>
-              <h3 style={{ marginBottom: "10px" }}>Choose a Body Zone</h3>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {zoneOptions.map((zone) => (
-                  <button
-                    key={zone}
-                    type="button"
-                    style={tabButtonStyle(selectedZone === zone)}
-                    onClick={() => handleSelectZone(zone)}
-                  >
-                    {Cap(zone)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <input
-                type="text"
-                placeholder="Search exercises"
-                value={builderSearch}
-                onChange={(e) => setBuilderSearch(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={fixedExercisePickerBoxStyle}>
-              {loadingExercises ? (
-                <p>Loading exercises...</p>
-              ) : allExercises.length === 0 ? (
-                <p>No exercises found in this body zone.</p>
-              ) : (
-                <div style={{ display: "grid", gap: "10px" }}>
-                  {allExercises.map((exercise) => {
-                    const exerciseId = exercise._id || exercise.id || exercise.datasetId || exercise.name;
-                    const alreadyAdded = builderExercises.some(
-                      (item) => item.exerciseId === exerciseId
-                    );
-
-                    return (
-                      <div
-                        key={exerciseId}
-                        style={{
-                          border: "1px solid var(--border)",
-                          borderRadius: "12px",
-                          padding: "12px",
-                          background: "var(--social-bg)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "10px",
-                            flexWrap: "wrap",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <h3 style={{ margin: "0 0 8px 0", wordBreak: "break-word" }}>
-                              {exercise.name}
-                            </h3>
-                            <p style={{ margin: "0 0 4px 0" }}>
-                              <strong>Body Part:</strong>{" "}{exercise.bodyPart || "N/A"}
-                            </p>
-                            <p style={{ margin: 0 }}>
-                              <strong>Equipment:</strong> {exercise.equipment || "N/A"}
-                            </p>
-                          </div>
-
-                          <Button
-                            label={alreadyAdded ? "Added" : "Add"}
-                            variant="primary"
-                            onClick={() => addExerciseToWorkoutPlan(exercise)}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Button
-                label="Back to Workout"
-                variant="secondary"
-                onClick={() => setBuilderStep("builder")}
-              />
-              <Button
-                label="Cancel New Workout"
-                variant="secondary"
-                onClick={handleCloseBuilder}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    <AddExercise
+      title="Add Exercise"
+      description="Choose a body zone or search for exercises to add to your workout plan."
+      searchValue={builderSearch}
+      onSearchChange={setBuilderSearch}
+      loadingExercises={loadingExercises}
+      exercises={allExercises}
+      zoneOptions={zoneOptions}
+      selectedZone={selectedZone}
+      onSelectZone={handleSelectZone}
+      isExerciseAlreadyAdded={(exercise) =>
+        builderExercises.some(
+          (item) => item.exerciseId === (exercise._id || exercise.id || exercise.datasetId || exercise.name)
+        )
+      }
+      onAddExercise={addExerciseToWorkoutPlan}
+      onCancel={() => setBuilderStep("builder")}
+      cancelLabel="Back to Workout"
+      cancelVariant="secondary"
+      extraActions={
+        <>
+          <Button
+            label="Save Workout"
+            variant="secondary"
+            onClick={() => { void handleSaveWorkoutPlan(); }}
+            disabled={!workoutName.trim() || builderExercises.length === 0}
+          />
+          <Button
+            label="Cancel"
+            variant="secondary"
+            onClick={handleCloseBuilder}
+          />
+        </>
+      }
+    />
+  );
   }
 
   //QUICK START WORKOUT BUILDER PAGE

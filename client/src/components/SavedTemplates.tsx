@@ -71,7 +71,7 @@ const SavedTemplates = ({
 
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                       <Button
-                        label="Start Workout"
+                        label="Start Plan"
                         variant="start"
                         onClick={() => onStartWorkout(workout)}
                       />

@@ -486,7 +486,7 @@ export const QuickStartWorkoutBuilder = ({
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <Button
               label="Finish Workout"
-              variant="primary"
+              variant="secondary"
               onClick={onFinishWorkout}
               disabled={quickStartExercises.length === 0 || disableFinishWorkout}
             />
