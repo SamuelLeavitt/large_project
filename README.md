@@ -4,12 +4,12 @@ A MERN stack web application and Android mobile app for planning and tracking wo
 
 ## Team Members
 
-Anthony Fontana
-Jalen Henry
-Samuel Leavitt
-Jose Serrano
-Linh Tran
-Leonardo Vargas
+- Anthony Fontana
+- Jalen Henry
+- Samuel Leavitt
+- Jose Serrano
+- Linh Tran
+- Leonardo Vargas
 
 ## License
 
