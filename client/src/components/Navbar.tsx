@@ -104,7 +104,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
             <Logo />
 
             {/*Center of Navbar: Search Bar (Only shows if logged in)*/}
-            <div className="navbar__desktop-search" style={{
+            {/* <div className="navbar__desktop-search" style={{
                 flex: 1,
                 display: 'flex',
                 justifyContent: 'center',
@@ -117,7 +117,8 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                         <SearchBar />
                     </div>
                 )}
-            </div>
+            </div> */}
+            
 
             {/*Right side of Navbar: 
                 isLoggedIn = False, shows Login/Register/ThemeToggle
