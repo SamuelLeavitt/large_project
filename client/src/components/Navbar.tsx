@@ -141,7 +141,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                         </Link> */}
 
                         {/*Button for workout page hides itself when on the workout page */}
-                        {location.pathname !== "/workout" && (
+                        {location.pathname !== "/workout" && location.pathname !== "/" && (
                             <Link to="/workout" style={{ textDecoration: 'none' }}>
                                 <Button label="Workout" variant="secondary" onClick={() => { }} />
                             </Link>
@@ -208,7 +208,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
                         {/* <Link to="/">               <Button label="Home" variant="secondary" onClick={() => { }} /></Link> */}
                         {/* <Link to="/profile">        <Button label="Profile" variant="secondary" onClick={() => { }} /></Link> */}
 
-                        {location.pathname !== "/workout" && (
+                        {location.pathname !== "/workout" && location.pathname !== "/" && (
                             <Link to="/workout">        <Button label="Workout" variant="secondary" onClick={() => { }} /></Link>
                         )}
 

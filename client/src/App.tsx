@@ -43,7 +43,7 @@ function App(){
         {/* Define the routes to the various pages for this workout app */}
       <Routes>
         {/* If isLoggedIn = true, show Home page. If isLoggedIn = false, redirect to Login page */}
-        <Route path = "/" element={isLoggedIn ? <Home /> : <Navigate to='/login' />} />
+        {/* <Route path = "/" element={isLoggedIn ? <Home /> : <Navigate to='/login' />} /> */}
 
         {/* Pass the function setIsLoggedIn to the login page. Once logged in, update the isLoggedIn state */}
         <Route path = "/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
@@ -58,7 +58,9 @@ function App(){
 
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route path = "/profile" element={isLoggedIn ? <Profile /> : <Navigate to='/login' />} />
+        {/* <Route path = "/profile" element={isLoggedIn ? <Profile /> : <Navigate to='/login' />} /> */}
+
+        <Route path="/" element={isLoggedIn ? <Workout /> : <Navigate to='/login' />} />
 
         <Route path="/workout" element={isLoggedIn ? <Workout /> : <Navigate to='/login' />} />
 
