@@ -14,6 +14,6 @@ export default [
     }
   },
   {
-    ignores: ["node_modules/**", "dist/**", "build/**", "client/build/**"],
+    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**"]
   },
 ];
