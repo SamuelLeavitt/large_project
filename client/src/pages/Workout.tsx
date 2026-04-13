@@ -868,7 +868,7 @@ const Workout = () => {
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <Button
                 label="Save Name"
-                variant="primary"
+                variant="secondary"
                 onClick={handleSaveWorkoutName}
                 disabled={!workoutName.trim()}
               />
@@ -1276,10 +1276,11 @@ const Workout = () => {
         <h1 style={headingStyle}> Workout</h1>
 
       </div>
-      <Button
-        label="Start an Empty Workout"
-        onClick={handleStartBlankQuickStart}
-      />
+            <Button
+              label = "Start an Empty Workout"
+              variant="secondary"
+              onClick={handleStartBlankQuickStart}
+            />
 
       <SavedTemplates
         filteredSavedWorkouts={filteredSavedWorkouts}

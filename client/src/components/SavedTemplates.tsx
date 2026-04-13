@@ -8,6 +8,7 @@ const sectionStyle: React.CSSProperties = {
   padding: "20px",
   boxShadow: "0 10px 24px rgba(15, 23, 42, 0.04)",
   textAlign: "left",
+  fontFamily: 'inherit',
 };
 
 const fixedSavedWorkoutsListStyle: React.CSSProperties = {
@@ -31,16 +32,16 @@ const SavedTemplates = ({
   onDeleteWorkoutPlan,
 }: SavedTemplatesProps) => {
   return (
-    // added a fixed width so it has a default size and doesn't increase or decrease when adding templates
-    <div style={{ display: "grid", gap: "24px",width:"900px" }}>
+
+    <div style={{ display: "grid", gap: "24px"}}>
       <div style={sectionStyle}>
         <div className="flex items-center justify-between mb-4 gap-4">
-          <h2>Saved Templates</h2>
-          <Button label="Create Template" variant="primary" onClick={onCreateTemplate} />
+          <h2>Saved Plans</h2>
+          <Button label="Create a Plan" variant="secondary" onClick={onCreateTemplate} />
         </div>
 
         {filteredSavedWorkouts.length === 0 ? (
-          <p style={{ marginTop: "12px" }}>No saved templates yet.</p>
+          <p style={{ marginTop: "12px" }}>No plans saved.</p>
         ) : (
           <div style={{ ...fixedSavedWorkoutsListStyle, marginTop: "12px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: "14px" }}>
@@ -66,15 +67,12 @@ const SavedTemplates = ({
                   >
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <h3 style={{ margin: 0, wordBreak: "break-word" }}>{workout.name}</h3>
-                      <p style={{ marginTop: "6px" }}>
-                        <strong>Body Area:</strong> {workout.bodyPart}
-                      </p>
                     </div>
 
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                       <Button
                         label="Start Workout"
-                        variant="primary"
+                        variant="start"
                         onClick={() => onStartWorkout(workout)}
                       />
                       <Button
@@ -95,6 +93,8 @@ const SavedTemplates = ({
                           padding: "10px",
                           borderRadius: "10px",
                           background: "var(--social-bg)",
+                          fontFamily: 'inherit',
+                          fontSize: '13px',
                         }}
                       >
                         <strong>{exercise.name}</strong>

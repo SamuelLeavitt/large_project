@@ -43,44 +43,68 @@ export default function WorkoutList({ data }: Props) {
       return next;
     });
 
-  if (!sessions.length) return <p className="workout-list__empty">No sessions logged yet.</p>;
+  if (!sessions.length)
+    return (
+      <div className="wl-empty">
+        <span className="wl-empty__icon">🏋️</span>
+        <p>No sessions logged yet.</p>
+      </div>
+    );
 
   return (
-    <div className="workout-list">
-      <h2>Session Log</h2>
-      <div className="workout-list__sessions">
-        {sessions.map((session) => {
+    <div className="wl-root">
+      <h2 className="wl-heading">Session Log</h2>
+      <div className="wl-sessions">
+        {sessions.map((session, idx) => {
           const isOpen = expanded.has(session.sessionKey);
-          return (
-            <div key={session.sessionKey} className="session-block">
+          const totalSets = session.workouts.reduce((acc, w) => acc + w.sets.length, 0);
+          const exerciseCount = session.workouts.length;
 
-              {/* collapsed row:  date and time only */}
+          return (
+            <div
+              key={session.sessionKey}
+              className={`wl-card${isOpen ? " wl-card--open" : ""}`}
+              style={{ animationDelay: `${idx * 40}ms` }}
+            >
+              {/* session header row */}
               <button
-                className="session-block__row"
+                className="wl-card__header"
                 onClick={() => toggle(session.sessionKey)}
               >
-                <span className="session-block__chevron">{isOpen ? "▾" : "▸"}</span>
-                <span className="session-block__date">
-                  {formatDateFull(session.date)} · {formatTime(session.time)}
-                </span>
+                <div className="wl-card__header-left">
+                  <span className="wl-card__date">
+                    {formatDateFull(session.date)}
+                  </span>
+                  <span className="wl-card__time">
+                    {formatTime(session.time)}
+                  </span>
+                </div>
+
+                <div className="wl-card__header-right">
+                  <span className="wl-card__pill">{exerciseCount} exercise{exerciseCount !== 1 ? "s" : ""}</span>
+                  <span className="wl-card__pill">{totalSets} set{totalSets !== 1 ? "s" : ""}</span>
+                  <span className={`wl-card__chevron${isOpen ? " wl-card__chevron--open" : ""}`}>
+                    ›
+                  </span>
+                </div>
               </button>
 
-              {/* expanded: exercise name with each set on its own line */}
-              <br />
+              {/* expanded body */}
               {isOpen && (
-                
-                <div className="session-block__body">
+                <div className="wl-card__body">
                   {session.workouts.map((w, i) => (
-                    <div key={`${w.exercise}-${i}`} className="session-block__exercise-preview">
-                      <span className="session-block__exercise-name">{w.exercise}</span>
-                      <div className="session-block__set-preview" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <br />
+                    <div key={`${w.exercise}-${i}`} className="wl-exercise">
+                      <div className="wl-exercise__header">
+                        <span className="wl-exercise__name">{w.exercise}</span>
+                        <span className="wl-exercise__count">{w.sets.length} sets</span>
+                      </div>
+                      <div className="wl-exercise__sets">
                         {w.sets.map((s, j) => (
-                          <span key={j} className="session-block__set-chip">
+                          <span key={j} className="wl-set-chip">
+                            <span className="wl-set-chip__num">#{j + 1}</span>
                             {s.weight} lbs × {s.reps} reps
                           </span>
                         ))}
-                        <br />
                       </div>
                     </div>
                   ))}

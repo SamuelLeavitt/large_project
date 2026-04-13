@@ -4,7 +4,7 @@ interface ExerciseDetailModalProps {
   exercise: Exercise;
   onClose: () => void;
 }
-
+const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const ExerciseDetailModal = ({ exercise, onClose }: ExerciseDetailModalProps) => (
   <div className="ex-lib-overlay" onClick={onClose}>
     <div className="ex-lib-modal" onClick={(e) => e.stopPropagation()}>
@@ -30,19 +30,19 @@ const ExerciseDetailModal = ({ exercise, onClose }: ExerciseDetailModalProps) =>
       <div className="ex-lib-modal__info">
         <div>
           <p className="ex-lib-modal__info-label">Equipment</p>
-          <p className="ex-lib-modal__info-value">{exercise.equipment ?? "None"}</p>
+          <p className="ex-lib-modal__info-value">{Cap(exercise.equipment ?? "")}</p>
         </div>
         <div>
-          <p className="ex-lib-modal__info-label">Primary muscles</p>
+          <p className="ex-lib-modal__info-label">Primary Muscles</p>
           <p className="ex-lib-modal__info-value">
-            {exercise.primaryMuscles!.join(", ") || "—"}
+            {Cap(exercise.primaryMuscles!.join(", ")) || "—"}
           </p>
         </div>
         {exercise.secondaryMuscles!.length > 0 && (
           <div style={{ gridColumn: "1 / -1" }}>
-            <p className="ex-lib-modal__info-label">Secondary muscles</p>
+            <p className="ex-lib-modal__info-label">Secondary Muscles</p>
             <p className="ex-lib-modal__info-value">
-              {exercise.secondaryMuscles!.join(", ")}
+              {exercise.secondaryMuscles!.map(Cap).join(", ")}
             </p>
           </div>
         )}
