@@ -47,6 +47,16 @@ export default function WorkoutList({ data }: Props) {
       return next;
     });
 
+  const allExpanded = sessions.length > 0 && expanded.size === sessions.length;
+
+  const toggleAll = () => {
+    if (allExpanded) {
+      setExpanded(new Set());
+    } else {
+      setExpanded(new Set(sessions.map((s) => s.sessionKey)));
+    }
+  };
+
   if (!sessions.length)
     return (
       <div className="wl-empty">
@@ -57,7 +67,12 @@ export default function WorkoutList({ data }: Props) {
 
   return (
     <div className="wl-root">
-      <h2 className="wl-heading">Session Log</h2>
+      <div className="wh-section__row">
+        <h2 className="wl-heading">Sessions</h2>
+        <button className="wc-toggle__btn" onClick={toggleAll}>
+          {allExpanded ? "Collapse all" : "Expand all"}
+        </button>
+      </div>
       <div className="wl-sessions">
         {sessions.map((session, idx) => {
           const isOpen = expanded.has(session.sessionKey);
@@ -76,11 +91,11 @@ export default function WorkoutList({ data }: Props) {
                 onClick={() => toggle(session.sessionKey)}
               >
                 <div className="wl-card__header-left">
-                  <span className="wl-card__date">
-                    {formatDateFull(session.date)}
+                  <span className="wl-card__workoutname">
+                    {session.workouts[0].workoutName ?? "Quick Start"}
                   </span>
-                  <span className="wl-card__time">
-                    {formatTime(session.time)}
+                  <span className="wl-card__date_time">
+                    {formatDateFull(session.date)} · {formatTime(session.time)}
                   </span>
                 </div>
 
@@ -105,7 +120,7 @@ export default function WorkoutList({ data }: Props) {
                       <div className="wl-exercise__sets">
                         {w.sets.map((s, j) => (
                           <span key={j} className="wl-set-chip">
-                            <span className="wl-set-chip__num">#{j + 1}</span>
+                            <span className="wl-set-chip__num">Set {j + 1}:</span>
                             {s.weight} lbs × {s.reps} reps
                           </span>
                         ))}

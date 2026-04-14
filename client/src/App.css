@@ -542,13 +542,13 @@
   gap: 2px;
 }
 
-.wl-card__date {
+.wl-card__workoutname {
   font-size: 15px;
   font-weight: 700;
   color: var(--text);
 }
 
-.wl-card__time {
+.wl-card__date_time {
   font-size: 12px;
   color: var(--text);
   opacity: 0.5;
