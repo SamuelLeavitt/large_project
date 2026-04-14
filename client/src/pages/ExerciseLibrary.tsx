@@ -79,13 +79,7 @@ const ExerciseLibrary = () => {
 
   return (
     <>
-      <div className="workout-list" style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "24px",
-          display: "grid",
-          gap: "24px",
-        }}>
+      <div className="ex-lib-root">
         <h2 style={{ marginBottom: "24px" }}>  </h2>
 
         {/* filters */}
@@ -126,7 +120,7 @@ const ExerciseLibrary = () => {
         </div>
 
         {!loading && (
-          <div className="counter" style={{ display: "inline-block", cursor: "default" }}>
+          <div className="counter" style={{ cursor: "default" , justifySelf: "start"}}>
             {total.toLocaleString()} exercises
           </div>
         )}

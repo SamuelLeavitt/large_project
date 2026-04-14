@@ -725,6 +725,14 @@
 
 /* Exercise Library Styling */
 
+.ex-lib-root {
+    padding: 24px;
+    min-width: min(1100px, 100%);  
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+} 
+
 .ex-lib-filters {
     display: flex;
     gap: 8px;
@@ -766,6 +774,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
 }
 
 .ex-lib-row {
@@ -929,6 +938,7 @@
     align-items: flex-end;
     justify-content: center;
     z-index: 1000;
+    padding-bottom: 12px;
 }
 
 @media (min-width: 600px) {
@@ -941,19 +951,14 @@
 .ex-lib-modal {
     background: var(--bg);
     border-top: 1px solid var(--border);
-    border-radius: 16px 16px 0 0;
-    padding: 24px 20px 32px;
+    border-radius: 16px;
+    padding: 24px 20px 32px ;
     width: 100%;
     max-width: 560px;
     max-height: 88vh;
     overflow-y: auto;
-}
-
-@media (min-width: 600px) {
-    .ex-lib-modal {
-        border-radius: 16px;
-        border: 1px solid var(--border);
-    }
+    box-sizing: border-box;
+    margin: 0 12px;
 }
 
 .ex-lib-modal__header {
