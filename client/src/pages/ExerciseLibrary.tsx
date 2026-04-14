@@ -55,6 +55,7 @@ const ExerciseLibrary = () => {
       if (category)  params.set("category", category);
       if (level)     params.set("level", level);
       if (equipment) params.set("equipment", equipment);
+      if (muscle)    params.set("muscle", muscle);
       params.set("page", String(page));
       params.set("limit", "20");
 
@@ -66,7 +67,7 @@ const ExerciseLibrary = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, category, level, equipment, page]);
+  }, [search, category, level, equipment, muscle, page]);
 
   useEffect(() => { fetchExercises(); }, [fetchExercises]);
 
