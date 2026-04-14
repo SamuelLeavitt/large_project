@@ -39,9 +39,9 @@ const inputStyle: React.CSSProperties = {
 };
 
 const shellStyle: React.CSSProperties = {
-  maxWidth: "1180px",
-  margin: "0 auto",
   padding: "24px",
+  minWidth: "min(1100px, 100%)",
+  margin: "0 auto",
   display: "grid",
   gap: "22px",
 };
@@ -733,9 +733,9 @@ const Workout = () => {
     return (
       <div
         style={{
-          maxWidth: "820px",
-          margin: "0 auto",
           padding: "24px",
+          minWidth: "min(1100px, 100%)",
+          margin: "0 auto",
           display: "grid",
           gap: "24px",
         }}
@@ -814,9 +814,9 @@ const Workout = () => {
     return (
       <div
         style={{
-          maxWidth: "820px",
-          margin: "0 auto",
           padding: "24px",
+          minWidth: "min(1100px, 100%)",
+          margin: "0 auto",
           display: "grid",
           gap: "24px",
         }}
@@ -867,9 +867,9 @@ const Workout = () => {
     return (
       <div
         style={{
-          maxWidth: "900px",
-          margin: "0 auto",
           padding: "24px",
+          minWidth: "min(1100px, 100%)",
+          margin: "0 auto",
           display: "grid",
           gap: "24px",
         }}
@@ -1111,9 +1111,9 @@ const Workout = () => {
     return (
       <div
         style={{
-          maxWidth: "820px",
-          margin: "0 auto",
           padding: "24px",
+          minWidth: "min(1100px, 100%)",
+          margin: "0 auto",
           display: "grid",
           gap: "24px",
         }}
@@ -1166,7 +1166,7 @@ const Workout = () => {
       }}
     >
       <div>
-        <h1 style={headingStyle}> Workout</h1>
+        <h1 style={headingStyle}> </h1>
 
       </div>
             <Button

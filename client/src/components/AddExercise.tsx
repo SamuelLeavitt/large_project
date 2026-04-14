@@ -64,7 +64,7 @@ const AddExercise = ({
 }: AddExerciseProps) => {
   const [selected, setSelected] = useState<Exercise | null>(null);
   const [showMap, setShowMap] = useState(false);
-  const handleZonePick = (zone: string) => {             // ← new
+  const handleZonePick = (zone: string) => {
     onSelectZone(zone);
     setShowMap(false);
   };
@@ -238,7 +238,7 @@ const AddExercise = ({
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ margin: 0 }}>Pick a Muscle Group</h2>
+              <h2 style={{ margin: 0 }}>Choose a Muscle</h2>
               <Button label="Close" variant="secondary" onClick={() => setShowMap(false)} />
             </div>
             <p style={{ margin: 0, color: "var(--text-muted)" }}>

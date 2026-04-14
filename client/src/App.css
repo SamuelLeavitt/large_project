@@ -187,7 +187,7 @@
 
 .wh-root {
   padding: 24px;
-  max-width: 900px;
+  min-width: min(1100px, 100%);  
   margin: 0 auto;
   display: grid;
   gap: 24px;
@@ -231,6 +231,15 @@
   margin: 0;
 }
 
+.wh-section__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 /* ── Exercise selector ─────────────────────────────────────── */
 
 .wh-selector {
@@ -268,7 +277,9 @@
   font-size: 13px;
   font-weight: 600;
   border: 1.5px solid var(--border);
-  color: "var(--text-h)";
+  background: var(--code-bg);
+  color: var(--text-h);
+  color-scheme: inherit;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
@@ -726,14 +737,15 @@
     flex: 1;
     min-width: 140px;
     padding: 8px 12px;
-    border-radius: 5px;
-    border: 2px solid transparent;
-    background: var(--social-bg);
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--code-bg);
     color: var(--text-h);
+    color-scheme: inherit;
     font-size: 14px;
     font-family: inherit;
     outline: none;
-    transition: border-color 0.3s;
+    transition: border-color 0.2s ease;
 }
 
 .ex-lib-filters input:focus,
@@ -748,7 +760,7 @@
     }
 }
 
-/* Exercise List  */
+/* Exercise List */
 
 .ex-lib-list {
     display: flex;
@@ -762,18 +774,19 @@
     gap: 12px;
     padding: 12px 16px;
     background: var(--social-bg);
-    border: 2px solid transparent;
-    border-radius: 6px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
     cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
     text-align: left;
     width: 100%;
     font-family: inherit;
+    animation: wl-fade-in 0.3s ease both;
 }
 
 .ex-lib-row:hover {
     border-color: var(--accent-border);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .ex-lib-row:focus-visible {
@@ -788,7 +801,7 @@
 
 .ex-lib-row__name {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-h);
     white-space: nowrap;
     overflow: hidden;
@@ -806,7 +819,6 @@
     text-overflow: ellipsis;
 }
 
-
 .ex-lib-chips {
     display: flex;
     gap: 6px;
@@ -819,14 +831,14 @@
 .ex-lib-chip {
     background: var(--accent-bg);
     color: var(--accent);
-    padding: 3px 10px;
-    border-radius: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
     text-transform: capitalize;
-    border: 2px solid transparent;
-    transition: border-color 0.3s;
+    border: 1px solid transparent;
+    transition: border-color 0.2s ease;
 }
 
 .ex-lib-row:hover .ex-lib-chip {
@@ -839,23 +851,21 @@
     }
 }
 
-
 .ex-lib-chevron {
     flex-shrink: 0;
     color: var(--accent);
-    opacity: 0.3;
-    transition: opacity 0.2s, transform 0.2s;
+    opacity: 0.35;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .ex-lib-row:hover .ex-lib-chevron {
-    opacity: 1;
+    opacity: 0.75;
     transform: translateX(2px);
 }
 
-
 .ex-lib-skeleton {
     height: 62px;
-    border-radius: 6px;
+    border-radius: 14px;
     background: var(--accent-bg);
     opacity: 0.5;
     animation: ex-pulse 1.4s ease-in-out infinite;
@@ -866,7 +876,7 @@
     50%       { opacity: 0.8; }
 }
 
-/* exercise list pagination */
+/* Exercise list pagination */
 
 .ex-lib-pagination {
     display: flex;
@@ -878,14 +888,14 @@
 
 .ex-lib-page-btn {
     font-size: 14px;
-    padding: 5px 14px;
-    border-radius: 5px;
+    padding: 7px 14px;
+    border-radius: 999px;
     color: var(--accent);
     background: var(--accent-bg);
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     cursor: pointer;
     font-family: inherit;
-    transition: border-color 0.3s;
+    transition: border-color 0.2s ease; 
 }
 
 .ex-lib-page-btn:hover:not(:disabled) {
@@ -909,12 +919,12 @@
     text-align: center;
 }
 
-/* exercise modal */
+/* Exercise modal */
 
 .ex-lib-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -931,7 +941,7 @@
 .ex-lib-modal {
     background: var(--bg);
     border-top: 1px solid var(--border);
-    border-radius: 10px 10px 0 0;
+    border-radius: 16px 16px 0 0;
     padding: 24px 20px 32px;
     width: 100%;
     max-width: 560px;
@@ -941,7 +951,7 @@
 
 @media (min-width: 600px) {
     .ex-lib-modal {
-        border-radius: 10px;
+        border-radius: 16px;
         border: 1px solid var(--border);
     }
 }
@@ -954,7 +964,7 @@
 }
 
 .ex-lib-modal__title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--text-h);
     margin: 0;
@@ -963,10 +973,10 @@
 .ex-lib-modal__close {
     background: var(--accent-bg);
     color: var(--accent);
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     width: 32px;
     height: 32px;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
     display: flex;
@@ -974,7 +984,7 @@
     justify-content: center;
     flex-shrink: 0;
     margin-left: 12px;
-    transition: border-color 0.3s;
+    transition: border-color 0.2s ease;
 }
 
 .ex-lib-modal__close:hover {
@@ -987,18 +997,19 @@
     gap: 12px 20px;
     margin: 16px 0 20px;
     padding: 14px 16px;
-    background: var(--bg);
-    border-radius: 5px;
+    background: var(--social-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
 }
 
 .ex-lib-modal__info-label {
     font-size: 11px;
     color: var(--accent);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     margin: 0 0 3px;
-    opacity: 0.7;
+    opacity: 0.45;
 }
 
 .ex-lib-modal__info-value {
@@ -1010,9 +1021,12 @@
 /* modal instructions */
 
 .ex-lib-modal__steps-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-h);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    opacity: 0.45;
     margin: 0 0 10px;
 }
 
@@ -1037,14 +1051,14 @@
     justify-content: center;
     width: 22px;
     height: 22px;
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--accent-bg);
     color: var(--accent);
     font-size: 11px;
     font-weight: 700;
     flex-shrink: 0;
     margin-top: 2px;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
 }
 
 .ex-lib-modal__step-text {

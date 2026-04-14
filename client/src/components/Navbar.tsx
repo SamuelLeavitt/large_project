@@ -2,7 +2,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
 import Button from "./Button";
-import SearchBar from "./SearchBar";
 import "../App.css"
 import Logo from "./Logo";
 
@@ -202,7 +201,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
         {/* mobile drawer */}
         <div className={`navbar__drawer${menuOpen ? ' open' : ''}`}>
             <div className="navbar__drawer-inner">
-                {isLoggedIn && <SearchBar />}
+
                 {isLoggedIn ? (
                     <>
                         {/* <Link to="/">               <Button label="Home" variant="secondary" onClick={() => { }} /></Link> */}

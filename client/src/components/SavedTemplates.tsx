@@ -12,8 +12,8 @@ const sectionStyle: React.CSSProperties = {
 };
 
 const fixedSavedWorkoutsListStyle: React.CSSProperties = {
-  minHeight: "420px",
-  maxHeight: "420px",
+  minHeight: "1100px",
+  maxHeight: "1100px",
   overflowY: "auto",
   paddingRight: "6px",
 };
@@ -36,7 +36,7 @@ const SavedTemplates = ({
     <div style={{ display: "grid", gap: "24px"}}>
       <div style={sectionStyle}>
         <div className="flex items-center justify-between mb-4 gap-4">
-          <h2>Saved Plans</h2>
+          <h3>Saved Plans</h3>
           <Button label="Create a Plan" variant="secondary" onClick={onCreateTemplate} />
         </div>
 

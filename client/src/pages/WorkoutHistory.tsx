@@ -4,6 +4,7 @@ import WorkoutChart from "../components/WorkoutChart";
 import WorkoutList from "../components/WorkoutList";
 import { getWorkouts } from "../utils/workoutData";
 import type { Workout } from "../utils/workoutData";
+import "../App.css";
 
 // displays workout history log page - includes line chart to show progress over time for a selected exercise and a full session log below
 export default function WorkoutHistoryPage() {
