@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import LoadingState from "../components/LoadingState";
 import "../App.css"
 import ExerciseDetailModal from "../components/ExerciseDetails";
+import MuscleMapFront from "../components/MuscleMapFront";
+import MuscleMapBack from "../components/MuscleMapBack";
 
 interface Exercise {
   _id: string;
@@ -27,6 +29,8 @@ const ExerciseLibrary = () => {
   const [category, setCategory]           = useState("");
   const [level, setLevel]                 = useState("");
   const [equipment, setEquipment]         = useState("");
+  const [muscle, setMuscle]               = useState("");
+  const [showMap, setShowMap]             = useState(false);
   const [categories, setCategories]       = useState<string[]>([]);
   const [equipmentList, setEquipmentList] = useState<string[]>([]);
   const [levels, setLevels]               = useState<string[]>([]);
@@ -66,10 +70,22 @@ const ExerciseLibrary = () => {
 
   useEffect(() => { fetchExercises(); }, [fetchExercises]);
 
+  const handleZonePick = (zone: string) => {
+    setMuscle(zone);
+    setPage(1);
+    setShowMap(false);
+  };
+
   return (
     <>
-      <div className="workout-list" style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <h2 style={{ marginBottom: "24px" }}>Exercise Library</h2>
+      <div className="workout-list" style={{
+          maxWidth: "900px",
+          margin: "0 auto",
+          padding: "24px",
+          display: "grid",
+          gap: "24px",
+        }}>
+        <h2 style={{ marginBottom: "24px" }}>  </h2>
 
         {/* filters */}
         <div className="ex-lib-filters">
@@ -91,8 +107,22 @@ const ExerciseLibrary = () => {
             <option value="">All equipment</option>
             {equipmentList.map((e) => <option key={e} value={e}>{Cap(e)}</option>)}
           </select>
+          {/* muscle map trigger */}
+          <button
+            className="ex-lib-page-btn"
+            onClick={() => setShowMap(true)}
+          >
+            {muscle ? `Muscle: ${Cap(muscle)}` : "Find by Muscle"}
+          </button>
+          {muscle && (
+            <button
+              className="ex-lib-page-btn"
+              onClick={() => { setMuscle(""); setPage(1); }}
+            >
+              Clear
+            </button>
+          )}
         </div>
-
 
         {!loading && (
           <div className="counter" style={{ display: "inline-block", cursor: "default" }}>
@@ -165,6 +195,49 @@ const ExerciseLibrary = () => {
           </div>
         )}
       </div>
+
+      {/* muscle map modal */}
+      {showMap && (
+        <div
+          onClick={() => setShowMap(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--bg)",
+              border: "1px solid var(--border)",
+              borderRadius: "18px",
+              padding: "24px",
+              width: "min(650px, 90vw)",
+              maxHeight: "85vh",
+              overflowY: "auto",
+              display: "grid",
+              gap: "16px",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2 style={{ margin: 0 }}>Choose a Muscle</h2>
+              <button className="ex-lib-page-btn" onClick={() => setShowMap(false)}>Close</button>
+            </div>
+            <p style={{ margin: 0, color: "var(--text-muted)" }}>
+              Click a muscle to filter exercises.
+            </p>
+            <div style={{ display: "flex", flexDirection: "row", gap: "20px", justifyContent: "center", alignItems: "flex-start" }}>
+              <MuscleMapFront onZoneClick={handleZonePick} />
+              <MuscleMapBack onZoneClick={handleZonePick} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* detail modal */}
       {selected && <ExerciseDetailModal exercise={selected} onClose={() => setSelected(null)} />}
