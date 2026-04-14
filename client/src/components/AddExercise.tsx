@@ -230,7 +230,7 @@ const AddExercise = ({
               border: "1px solid var(--border)",
               borderRadius: "18px",
               padding: "24px",
-              width: "min(500px, 90vw)",
+              width: "min(650px, 90vw)",
               maxHeight: "85vh",
               overflowY: "auto",
               display: "grid",
@@ -255,7 +255,7 @@ const AddExercise = ({
               <MuscleMapFront onZoneClick={handleZonePick} />  {/* closes on selection */}
               <MuscleMapBack onZoneClick={handleZonePick} />  {/* closes on selection */}
             </div>
-            
+
           </div>
         </div>
       )}
