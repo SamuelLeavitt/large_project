@@ -4,6 +4,7 @@ import type { Exercise } from "../utils/workoutTypes";
 import { useState } from "react";
 import ExerciseDetailModal from "./ExerciseDetails";
 import MuscleMapFront from "./MuscleMapFront";
+import MuscleMapBack from "./MuscleMapBack";
 
 const Cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -41,7 +42,7 @@ interface AddExerciseProps {
   onCancel: () => void;
   cancelLabel: string;
   cancelVariant?: "secondary" | "danger" | "primary";
-  extraActions?: React.ReactNode; 
+  extraActions?: React.ReactNode;
 }
 
 const AddExercise = ({
@@ -112,13 +113,13 @@ const AddExercise = ({
                 </option>
               ))}
             </select>
-          <div style={{ marginTop: "10px", display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              label="Find a Muscle"
-              variant="secondary"
-              onClick={() => setShowMap(true)}
-            />
-          </div>
+            <div style={{ marginTop: "10px", display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                label="Find a Muscle"
+                variant="secondary"
+                onClick={() => setShowMap(true)}
+              />
+            </div>
 
           </div>
 
@@ -243,11 +244,22 @@ const AddExercise = ({
             <p style={{ margin: 0, color: "var(--text-muted)" }}>
               Click a muscle to filter exercises.
             </p>
-            <MuscleMapFront onZoneClick={handleZonePick} />  {/* closes on selection */}
+
+            <div style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              justifyContent: "center",
+              alignItems: "flex-start"
+            }}>
+              <MuscleMapFront onZoneClick={handleZonePick} />  {/* closes on selection */}
+              <MuscleMapBack onZoneClick={handleZonePick} />  {/* closes on selection */}
+            </div>
+            
           </div>
         </div>
       )}
-      
+
       {selected && (
         <ExerciseDetailModal
           exercise={selected}
