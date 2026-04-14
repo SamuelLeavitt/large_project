@@ -2,57 +2,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
 
   bool loading = false;
   String? error;
-
-  Future<void> loginUser() async {
-    FocusScope.of(context).unfocus();
-
-    setState(() {
-      error = null;
-    });
-
-    final email = emailController.text.trim();
-    final password = passwordController.text;
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        error = 'Email and password are required.';
-      });
-      return;
-    }
-
-    setState(() {
-      loading = true;
-    });
-
-    try {
-      await AuthService.login(email, password);
-
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
-      setState(() {
-        error = e.toString().replaceFirst('Exception: ', '');
-      });
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        loading = false;
-      });
-    }
-  }
+  String? success;
 
   InputDecoration inputDecoration(String hint) {
     return InputDecoration(
@@ -94,10 +56,49 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> submit() async {
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      error = null;
+      success = null;
+    });
+
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
+      setState(() {
+        error = 'Email is required.';
+      });
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      final message = await AuthService.forgotPassword(email);
+      if (!mounted) return;
+
+      setState(() {
+        success = message;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString().replaceFirst('Exception: ', '');
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     emailController.dispose();
-    passwordController.dispose();
     super.dispose();
   }
 
@@ -116,12 +117,21 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 20),
                 const Text(
-                  'Login',
+                  'Forgot Password',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Enter your email and we’ll send you a password reset link.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF666666),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -131,39 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: inputDecoration('Enter your email'),
                 ),
-                const SizedBox(height: 20),
-                fieldLabel('Password'),
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: inputDecoration('Enter your password'),
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: loading
-                        ? null
-                        : () {
-                            Navigator.pushNamed(context, '/forgot-password');
-                          },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      'Forgot password?',
-                      style: TextStyle(
-                        color: Color(0xFF007BFF),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (error != null) ...[
+                const SizedBox(height: 24),
+                if (error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
@@ -171,11 +150,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: const TextStyle(color: Colors.red, fontSize: 14),
                     ),
                   ),
-                ],
+                if (success != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      success!,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: loading ? null : loginUser,
+                    onPressed: loading ? null : submit,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: const Color(0xFF007BFF),
@@ -192,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Text(loading ? 'Logging in...' : 'Login'),
+                    child: Text(loading ? 'Sending...' : 'Send Reset Email'),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -205,21 +194,28 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Color(0xFF666666),
                       ),
                       children: [
-                        const TextSpan(text: "Don't have an account? "),
+                        const TextSpan(text: 'Remembered your password? '),
                         TextSpan(
-                          text: 'Register here',
+                          text: 'Back to login',
                           style: const TextStyle(
                             color: Color(0xFF007BFF),
                             fontWeight: FontWeight.w500,
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              Navigator.pushNamed(context, '/register');
+                              Navigator.pushReplacementNamed(context, '/login');
                             },
                         ),
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/reset-password');
+                  },
+                  child: const Text('Already have a reset token?'),
                 ),
               ],
             ),

@@ -10,6 +10,7 @@ export interface IUser {
   emailVerificationTokenExpiresAt?: Date | null;
   passwordResetTokenHash?: string | null;
   passwordResetTokenExpiresAt?: Date | null;
+  themePreference?: "light" | "dark";
 }
 
 export interface IUserMethods {
@@ -58,6 +59,11 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     passwordResetTokenExpiresAt: {
       type: Date,
       default: null
+    },
+    themePreference: {
+      type: String,
+      enum: ["light", "dark"],
+      default: "light"
     }
   },
   {

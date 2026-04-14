@@ -1,6 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import { sendAuthEmail } from "../utils/mailer.js";
 
@@ -16,6 +17,35 @@ function hashToken(token: string) {
 
 function createToken() {
   return crypto.randomBytes(32).toString("hex");
+}
+
+function getUserIdFromRequest(req: express.Request): mongoose.Types.ObjectId | null {
+  const authHeader = req.headers.authorization || "";
+
+  if (!authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.slice(7).trim();
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "dev_secret_change_me"
+    ) as { userId?: string };
+
+    if (!payload.userId || !mongoose.isValidObjectId(payload.userId)) {
+      return null;
+    }
+
+    return new mongoose.Types.ObjectId(payload.userId);
+  } catch {
+    return null;
+  }
 }
 
 router.post("/register", async (req, res) => {
@@ -49,6 +79,7 @@ router.post("/register", async (req, res) => {
       email,
       passwordHash: password,
       isEmailVerified: false,
+      themePreference: "light",
     });
 
     const verificationToken = createToken();
@@ -137,6 +168,7 @@ router.post("/login", async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
+        themePreference: user.themePreference || "light",
       },
     });
   } catch (error: unknown) {
@@ -145,6 +177,76 @@ router.post("/login", async (req, res) => {
 
     console.error("Login error:", message);
     return res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/me", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
+    const user = await User.findById(userId).lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.json({
+      user: {
+        id: String(user._id),
+        username: user.username,
+        email: user.email,
+        themePreference: user.themePreference || "light",
+      },
+    });
+  } catch (error) {
+    console.error("Failed to load current user:", error);
+    return res.status(500).json({ message: "Failed to load current user." });
+  }
+});
+
+router.patch("/me", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
+    const rawThemePreference = String(req.body?.themePreference ?? "").trim().toLowerCase();
+
+    if (!["light", "dark"].includes(rawThemePreference)) {
+      return res.status(400).json({ message: "Invalid theme preference." });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          themePreference: rawThemePreference,
+        },
+      },
+      { new: true }
+    ).lean();
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.json({
+      user: {
+        id: String(updatedUser._id),
+        username: updatedUser.username,
+        email: updatedUser.email,
+        themePreference: updatedUser.themePreference || "light",
+      },
+    });
+  } catch (error) {
+    console.error("Failed to update profile:", error);
+    return res.status(500).json({ message: "Failed to update profile." });
   }
 });
 

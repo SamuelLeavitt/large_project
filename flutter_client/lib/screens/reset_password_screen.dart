@@ -2,57 +2,21 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ResetPasswordScreen extends StatefulWidget {
+  const ResetPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController();
+class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+  final tokenController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   bool loading = false;
   String? error;
-
-  Future<void> loginUser() async {
-    FocusScope.of(context).unfocus();
-
-    setState(() {
-      error = null;
-    });
-
-    final email = emailController.text.trim();
-    final password = passwordController.text;
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        error = 'Email and password are required.';
-      });
-      return;
-    }
-
-    setState(() {
-      loading = true;
-    });
-
-    try {
-      await AuthService.login(email, password);
-
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
-      setState(() {
-        error = e.toString().replaceFirst('Exception: ', '');
-      });
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        loading = false;
-      });
-    }
-  }
+  String? success;
 
   InputDecoration inputDecoration(String hint) {
     return InputDecoration(
@@ -94,10 +58,60 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> submit() async {
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      error = null;
+      success = null;
+    });
+
+    final tokenValue = tokenController.text.trim();
+    final password = passwordController.text;
+    final confirm = confirmPasswordController.text;
+
+    if (tokenValue.isEmpty || password.isEmpty || confirm.isEmpty) {
+      setState(() {
+        error = 'All fields are required.';
+      });
+      return;
+    }
+
+    if (password != confirm) {
+      setState(() {
+        error = 'Passwords do not match.';
+      });
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      final message = await AuthService.resetPassword(tokenValue, password);
+      if (!mounted) return;
+
+      setState(() {
+        success = message;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString().replaceFirst('Exception: ', '');
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
-    emailController.dispose();
+    tokenController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -116,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 20),
                 const Text(
-                  'Login',
+                  'Reset Password',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32,
@@ -124,46 +138,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.black,
                   ),
                 ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Paste your reset token and choose a new password.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF666666),
+                  ),
+                ),
                 const SizedBox(height: 30),
-                fieldLabel('Email'),
+                fieldLabel('Reset Token'),
                 TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: inputDecoration('Enter your email'),
+                  controller: tokenController,
+                  decoration: inputDecoration('Paste reset token'),
                 ),
                 const SizedBox(height: 20),
-                fieldLabel('Password'),
+                fieldLabel('New Password'),
                 TextField(
                   controller: passwordController,
                   obscureText: true,
-                  decoration: inputDecoration('Enter your password'),
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: loading
-                        ? null
-                        : () {
-                            Navigator.pushNamed(context, '/forgot-password');
-                          },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      'Forgot password?',
-                      style: TextStyle(
-                        color: Color(0xFF007BFF),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
+                  decoration: inputDecoration('Enter new password'),
                 ),
                 const SizedBox(height: 20),
-                if (error != null) ...[
+                fieldLabel('Confirm Password'),
+                TextField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: inputDecoration('Confirm new password'),
+                ),
+                const SizedBox(height: 24),
+                if (error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
@@ -171,11 +176,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: const TextStyle(color: Colors.red, fontSize: 14),
                     ),
                   ),
-                ],
+                if (success != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      success!,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: loading ? null : loginUser,
+                    onPressed: loading ? null : submit,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: const Color(0xFF007BFF),
@@ -192,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Text(loading ? 'Logging in...' : 'Login'),
+                    child: Text(loading ? 'Resetting...' : 'Reset Password'),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -205,16 +220,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Color(0xFF666666),
                       ),
                       children: [
-                        const TextSpan(text: "Don't have an account? "),
+                        const TextSpan(text: 'Back to '),
                         TextSpan(
-                          text: 'Register here',
+                          text: 'login',
                           style: const TextStyle(
                             color: Color(0xFF007BFF),
                             fontWeight: FontWeight.w500,
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              Navigator.pushNamed(context, '/register');
+                              Navigator.pushReplacementNamed(context, '/login');
                             },
                         ),
                       ],
