@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -10,8 +11,8 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleRegister = async (event?: FormEvent<HTMLFormElement>) => {
-        event?.preventDefault();
+    const handleRegister = async () => {
+
         if (loading) return;
         setError(null);
         if (!username || !email || !password) {
@@ -54,7 +55,7 @@ const Register = () => {
     return (
         <div style={{ maxWidth: '400px', margin: '100px auto', padding: '40px' }}>
             <h1 style={{ textAlign: 'center', marginBottom: '30px', lineHeight: '1.2' }}>Create Account</h1>
-            <form onSubmit={handleRegister}>
+            <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
                 <div style={{ marginBottom: '20px' }}>
                     <label htmlFor="username" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
                         Username
@@ -141,23 +142,14 @@ const Register = () => {
 
                 {error && <div style={{ color: 'red', marginBottom: '12px' }}>{error}</div>}
                 <div style={{ marginBottom: '20px' }}>
-                    <button
+                    <Button
+                        label={loading ? "Registering..." : "Register"}
+                        variant="secondary"
                         type="submit"
+                        fullWidth
                         disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '12px 20px',
-                            border: '1px solid var(--accent-border)',
-                            borderRadius: '8px',
-                            backgroundColor: 'var(--accent)',
-                            color: 'var(--bg)',
-                            fontWeight: 'bold',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            opacity: loading ? 0.7 : 1,
-                        }}
-                    >
-                        {loading ? "Registering..." : "Register"}
-                    </button>
+                        onClick={() => {}}
+                    />
                 </div>
             </form>
 

@@ -6,6 +6,7 @@ interface LoginProps {
     setIsLoggedIn: (loggedIn: boolean) => void;
 }
 
+
 const Login = ({ setIsLoggedIn }: LoginProps) => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
@@ -13,6 +14,10 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") handleLogin();
+    };
+    
     const handleLogin = async () => {
         setError(null);
         if (!email || !password) {
@@ -64,7 +69,7 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
 
     return (
         <div style={{ maxWidth: '400px', margin: '100px auto', padding: '40px' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Login</h1>
+            <h1 style={{ textAlign: 'center', marginBottom: '30px' }}> </h1>
             
             <div style={{ marginBottom: '20px' }}>
                 <label htmlFor="email" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
@@ -75,6 +80,7 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={handleKeyDown} 
                     placeholder="Enter your email"
                     style={{
                         width: '100%',
@@ -96,6 +102,7 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={handleKeyDown} 
                     placeholder="Enter your password"
                     style={{
                         width: '100%',
@@ -110,7 +117,7 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
 
             {error && <div style={{ color: 'red', marginBottom: '12px' }}>{error}</div>}
             <div style={{ marginBottom: '20px' }}>
-                <Button label={loading ? "Logging in..." : "Login"} variant="primary" onClick={handleLogin} disabled={loading} />
+                <Button label={loading ? "Logging in..." : "Login"} variant="secondary" onClick={handleLogin} disabled={loading} />
             </div>
 
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
