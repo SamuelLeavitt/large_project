@@ -69,7 +69,7 @@ const Login = ({ setIsLoggedIn }: LoginProps) => {
 
     return (
         <div style={{ maxWidth: '400px', margin: '100px auto', padding: '40px' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '30px' }}> </h1>
+            <h1 style={{ textAlign: 'center', marginBottom: '30px', lineHeight: '1.2' }}>Welcome Back</h1>
             
             <div style={{ marginBottom: '20px' }}>
                 <label htmlFor="email" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>

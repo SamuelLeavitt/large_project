@@ -42,7 +42,7 @@ const ForgotPassword = () => {
 
   return (
     <div style={{ maxWidth: "420px", margin: "100px auto", padding: "40px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "24px" }}>Forgot Password</h1>
+      <h1 style={{ textAlign: "center", marginBottom: "30px", lineHeight: '1.2' }}>Forgot Password</h1>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: "20px" }}>
           <label htmlFor="forgot-email" style={{ display: "block", marginBottom: "8px", fontWeight: 500 }}>
