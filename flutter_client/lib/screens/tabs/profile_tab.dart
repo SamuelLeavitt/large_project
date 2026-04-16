@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
-import '../../services/theme_service.dart';
 import '../../services/workout_service.dart';
 import '../../theme/app_styles.dart';
 import '../../widgets/app_buttons.dart';
@@ -19,7 +18,6 @@ class ProfileTab extends StatefulWidget {
 
 class _ProfileTabState extends State<ProfileTab> {
   bool _loading = true;
-  bool _updatingTheme = false;
   String? _error;
 
   CurrentUser? _user;
@@ -57,7 +55,6 @@ class _ProfileTabState extends State<ProfileTab> {
         _selectedExercise = exerciseNames.isNotEmpty ? exerciseNames.first : null;
       });
 
-      await ThemeService.setThemePreferenceString(user.themePreference);
     } catch (e) {
       if (!mounted) return;
 
@@ -98,45 +95,6 @@ class _ProfileTabState extends State<ProfileTab> {
     final sorted = names.toList()
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return sorted;
-  }
-
-  Future<void> _toggleTheme(bool isDark) async {
-    if (_user == null || _updatingTheme) return;
-
-    final newTheme = isDark ? 'dark' : 'light';
-
-    setState(() {
-      _updatingTheme = true;
-    });
-
-    try {
-      final updatedUser = await AuthService.updateThemePreference(newTheme);
-      await ThemeService.setThemePreferenceString(updatedUser.themePreference);
-
-      if (!mounted) return;
-      setState(() {
-        _user = updatedUser;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Theme preference saved as ${updatedUser.themePreference}.'),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _updatingTheme = false;
-        });
-      }
-    }
   }
 
   Future<void> _logout() async {
@@ -226,8 +184,6 @@ class _ProfileTabState extends State<ProfileTab> {
             else ...[
               _ProfileHeaderCard(
                 user: _user!,
-                updatingTheme: _updatingTheme,
-                onThemeChanged: _toggleTheme,
                 onLogout: _logout,
               ),
               const SizedBox(height: 18),
@@ -349,21 +305,15 @@ class _ProfileTabState extends State<ProfileTab> {
 
 class _ProfileHeaderCard extends StatelessWidget {
   final CurrentUser user;
-  final bool updatingTheme;
-  final ValueChanged<bool> onThemeChanged;
   final VoidCallback onLogout;
 
   const _ProfileHeaderCard({
     required this.user,
-    required this.updatingTheme,
-    required this.onThemeChanged,
     required this.onLogout,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = user.themePreference.toLowerCase() == 'dark';
-
     return SectionCard(
       child: Column(
         children: [
@@ -383,39 +333,6 @@ class _ProfileHeaderCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               color: Color(0xFF6E6A7C),
-            ),
-          ),
-          const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F8F6),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFD9D9D9)),
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Dark Mode',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (updatingTheme)
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2.2),
-                  )
-                else
-                  Switch(
-                    value: isDark,
-                    onChanged: onThemeChanged,
-                  ),
-              ],
             ),
           ),
           const SizedBox(height: 16),
