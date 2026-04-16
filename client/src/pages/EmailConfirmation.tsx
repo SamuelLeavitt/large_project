@@ -49,7 +49,17 @@ const EmailConfirmation = () => {
 
   return (
     <div style={{ maxWidth: "520px", margin: "100px auto", padding: "40px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Confirm your email</h1>
+      <h1
+        style={{
+          textAlign: "center",
+          margin: "0 0 20px",
+          lineHeight: 1.1,
+          letterSpacing: "-0.02em",
+          fontSize: "clamp(2rem, 6vw, 3.25rem)",
+        }}
+      >
+        Confirm your email
+      </h1>
       <p style={{ textAlign: "center", color: "#555", marginBottom: "24px" }}>
         You need to verify your account before logging in.
       </p>
