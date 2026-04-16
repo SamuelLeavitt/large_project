@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../services/auth_service.dart';
 import '../../services/workout_service.dart';
 import '../../theme/app_styles.dart';
 import '../../widgets/app_buttons.dart';
@@ -166,6 +167,17 @@ class _TemplateEditorScreenState extends State<TemplateEditorScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
+
+      if (e is SessionExpiredException) {
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Your session expired. Please log in again.'),
+            ),
+          );
+          return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
@@ -213,17 +225,17 @@ class _TemplateEditorScreenState extends State<TemplateEditorScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Workout Name', style: kLabelStyle),
+                Text('Workout Name', style: labelStyle(context)),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _nameController,
-                  decoration: appTextFieldDecoration('Example: Push Day A'),
+                  decoration: appTextFieldDecoration(context, 'Example: Push Day A'),
                 ),
                 const SizedBox(height: 14),
-                const Text('Body Zone', style: kLabelStyle),
+                Text('Body Zone', style: labelStyle(context)),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
-                  value: bodyPartOptions.contains(_bodyPart) ? _bodyPart : bodyPartOptions.first,
+                  initialValue: bodyPartOptions.contains(_bodyPart) ? _bodyPart : bodyPartOptions.first,
                   items: bodyPartOptions
                       .map(
                         (option) => DropdownMenuItem(
@@ -237,7 +249,7 @@ class _TemplateEditorScreenState extends State<TemplateEditorScreen> {
                       _bodyPart = value ?? 'Custom';
                     });
                   },
-                  decoration: appTextFieldDecoration('Select body zone'),
+                  decoration: appTextFieldDecoration(context, 'Select body zone'),
                 ),
               ],
             ),
@@ -318,7 +330,7 @@ class _TemplateEditorScreenState extends State<TemplateEditorScreen> {
                                       controller: TextEditingController(
                                         text: '${exercise.sets}',
                                       ),
-                                      decoration: appTextFieldDecoration('Sets'),
+                                      decoration: appTextFieldDecoration(context, 'Sets'),
                                       onChanged: (value) => _updateExerciseSets(index, value),
                                     ),
                                   ),
@@ -328,7 +340,7 @@ class _TemplateEditorScreenState extends State<TemplateEditorScreen> {
                                       controller: TextEditingController(
                                         text: exercise.reps,
                                       ),
-                                      decoration: appTextFieldDecoration('Reps'),
+                                      decoration: appTextFieldDecoration(context, 'Reps'),
                                       onChanged: (value) => _updateExerciseReps(index, value),
                                     ),
                                   ),

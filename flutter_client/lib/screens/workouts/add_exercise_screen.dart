@@ -157,7 +157,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Muscle Group', style: kLabelStyle),
+                Text('Muscle Group', style: labelStyle(context)),
                 const SizedBox(height: 12),
                 if (_loadingFilters)
                   const Center(child: CircularProgressIndicator())
@@ -182,7 +182,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                   ),
                 const SizedBox(height: 16),
                 TextField(
-                  decoration: appTextFieldDecoration('Search exercises'),
+                  decoration: appTextFieldDecoration(context, 'Search exercises'),
                   onChanged: (value) {
                     _search = value;
                   },

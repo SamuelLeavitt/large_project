@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../services/auth_service.dart';
 import '../../services/workout_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_cards.dart';

@@ -279,7 +279,7 @@ class _ProfileTabState extends State<ProfileTab> {
                             _selectedExercise = value;
                           });
                         },
-                        decoration: appTextFieldDecoration('Choose exercise'),
+                        decoration: appTextFieldDecoration(context, 'Choose exercise'),
                       ),
                       const SizedBox(height: 18),
                       Row(

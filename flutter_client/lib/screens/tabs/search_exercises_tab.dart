@@ -149,7 +149,7 @@ class _SearchExercisesTabState extends State<SearchExercisesTab> {
                 TextField(
                   controller: _searchController,
                   textInputAction: TextInputAction.search,
-                  decoration: appTextFieldDecoration('Search exercises...'),
+                  decoration: appTextFieldDecoration(context, 'Search exercises...'),
                   onSubmitted: (_) => _applySearch(),
                 ),
                 const SizedBox(height: 12),
@@ -329,7 +329,7 @@ class _FilterDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: value.isEmpty ? null : value,
+      initialValue: value.isEmpty ? null : value,
       items: items
           .map(
             (item) => DropdownMenuItem<String>(
@@ -339,7 +339,7 @@ class _FilterDropdown extends StatelessWidget {
           )
           .toList(),
       onChanged: onChanged,
-      decoration: appTextFieldDecoration(hint),
+      decoration: appTextFieldDecoration(context, hint),
       hint: Text(hint),
     );
   }

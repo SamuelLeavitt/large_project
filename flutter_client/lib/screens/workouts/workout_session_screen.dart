@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../services/auth_service.dart';
 import '../../services/workout_service.dart';
 import '../../theme/app_styles.dart';
 import '../../widgets/app_buttons.dart';
@@ -243,11 +244,11 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Workout Name', style: kLabelStyle),
+                Text('Workout Name', style: labelStyle(context)),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _nameController,
-                  decoration: appTextFieldDecoration('Enter workout name'),
+                  decoration: appTextFieldDecoration(context, 'Enter workout name'),
                 ),
               ],
             ),
@@ -256,7 +257,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
           SectionCard(
             child: Column(
               children: [
-                const Text('Stopwatch', style: kLabelStyle),
+                Text('Stopwatch', style: labelStyle(context)),
                 const SizedBox(height: 12),
                 Text(
                   _formatStopwatch(_elapsedSeconds),
@@ -399,7 +400,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                                                     controller: TextEditingController(
                                                       text: set.weight == 0 ? '' : '${set.weight}',
                                                     ),
-                                                    decoration: appTextFieldDecoration('lbs'),
+                                                    decoration: appTextFieldDecoration(context, 'lbs'),
                                                     onChanged: (value) => _updateSet(
                                                       exerciseIndex,
                                                       setIndex,
@@ -415,7 +416,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                                                     controller: TextEditingController(
                                                       text: set.reps == 0 ? '' : '${set.reps}',
                                                     ),
-                                                    decoration: appTextFieldDecoration('reps'),
+                                                    decoration: appTextFieldDecoration(context, 'reps'),
                                                     onChanged: (value) => _updateSet(
                                                       exerciseIndex,
                                                       setIndex,
