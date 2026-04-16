@@ -21,7 +21,6 @@ import ExerciseLibrary from './pages/ExerciseLibrary';
 
 // Import Navbar
 import Navbar from './components/Navbar';
-import WorkoutSearchByCategory from './pages/WorkoutSearchByCategory';
 
 
 function App(){
@@ -64,8 +63,6 @@ function App(){
 
         <Route path="/workout" element={isLoggedIn ? <Workout /> : <Navigate to='/login' />} />
 
-        <Route path="/WorkoutSearchByCategory" element={<WorkoutSearchByCategory />} />
-        
         <Route path="/workout-history" element={isLoggedIn ? <WorkoutHistory /> : <Navigate to='/login' />} />
 
         <Route path="/exercises" element={<ExerciseLibrary />} />
