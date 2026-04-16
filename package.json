@@ -12,6 +12,7 @@
     "typescript-eslint": "^8.58.1"
   },
   "scripts": {
-    "lint": "eslint . -f gha"
+    "lint": "eslint . -f gha",
+    "test:all": "./scripts/test-all.sh"
   }
 }
