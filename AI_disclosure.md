@@ -1,10 +1,11 @@
 ### Summary of AI use
-- Tool(s): ChatGPT (GPT-5.3)
+- Tool(s): ChatGPT (GPT-5.3), Claude (Sonnet 4.6)
 - Date(s): March 29 & April 14-16
-- Scope: Flutter application initial code generation & writing a dabase import script (modified and refined to meet project needs); this was achieved by giving it the frontend web code and asking it to help adapt the code
+- Scope: Flutter application initial code generation & writing a database import script (modified and refined to meet project needs); this was achieved by giving it the frontend web code and asking it to help adapt the code. 
 
-All AI-generated code was reviewed, tested, and modified to meet
-assignment requirements. Final implementation reflects my understanding
+Assistance for debugging styling inconsistency errors and generating general application styling recommendations.
+
+All AI-generated code was reviewed, tested, and modified to meet assignment requirements. Final implementation reflects my understanding
 of the concepts.
 
 Example prompt

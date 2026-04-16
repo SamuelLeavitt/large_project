@@ -1,0 +1,86 @@
+@startuml fittrack-activity-diagram
+start
+:Open FitTrack Application;
+if (Has valid JWT token?) then (yes)
+  :Load user session;
+else (no)
+  repeat
+    :Login / Register page;
+    if (Has account?) then (yes)
+      :Enter credentials \n(email / password);
+      if (Valid credentials?) then (yes)
+        :Receive JWT token;
+        :Store token in \nlocalStorage;
+      else (no)
+        :Show error \nmessage;
+      endif
+    else (no)
+      :Fill out registration form;
+      :Send verification \nemail with token link;
+      :Display "Check your \nemail" screen;
+      if (User clicks verification link?) then (yes)
+        if (Token valid & not expired?) then (yes)
+          :Mark account as \nverified in MongoDB;
+        else (no)
+          :Show "Invalid or \nexpired link" error;
+          :Offer to resend \nverification email;
+          stop
+        endif
+      else (no)
+        stop
+      endif
+    endif
+  repeat while (JWT stored?) is (no) not (yes)
+endif
+:Redirect to Workout Page (default);
+repeat
+  if (Navigate to?) then (Workout Page)
+    :Display Workout \nDashboard;
+    fork
+      :Start Active \nWorkout (empty);
+    fork again
+      :Create \nWorkout Plan;
+    fork again
+      :Start \nWorkout Plan;
+    end fork
+    :Select exercises, sets, reps, weight;
+    if (Save successful?) then (yes)
+      :Show success message;
+      :Fetch workout data from MongoDB;
+      :Update Workout Session \nHistory and Progress Chart;
+    else (no)
+      :Show error message;
+    endif
+  else if (Navigate to?) then (Workout History)
+    :Display Workout History \nand Progress Chart;
+    :Choose exercise to \ndisplay on Progress Chart;
+    fork
+      :View Max \nWeight Chart;
+    fork again
+      :View Max \nVolume Chart;
+    endfork
+  else if (Navigate to?) then (Exercise Library)
+    :Display searchable\n list of exercises;
+    fork
+      :Search \nby query;
+    fork again
+      :Sort by \ncategory;
+    fork again
+      :Sort by \nlevel;
+    fork again
+      :Sort by \nEquipment;
+    fork again
+      :Sort by \nMuscle Group;
+    endfork
+    :Display matching exercises;
+    if (View exercise details?) then (yes)
+      :Display exercise details;
+    else (no)
+    endif
+  else (Logout)
+    :Clear JWT from \nlocalStorage;
+    :Redirect to \nLogin page;
+    stop
+  endif
+repeat while (Stay in app?) is (yes) not (no)
+stop
