@@ -10,18 +10,18 @@ class AppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final topInset = MediaQuery.of(context).padding.top;
 
     return Container(
       width: double.infinity,
-      color: const Color(0xFFEAEAEA),
+      color: theme.colorScheme.surfaceContainerHighest,
       padding: EdgeInsets.fromLTRB(16, topInset + 18, 16, 14),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 26,
+        style: theme.textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: theme.colorScheme.onSurface,
           letterSpacing: 0.2,
         ),
       ),

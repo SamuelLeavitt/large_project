@@ -12,8 +12,10 @@ class PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: const Color(0xFFF1F1ED),
+      color: theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         borderRadius: BorderRadius.circular(999),
@@ -23,15 +25,15 @@ class PillButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFD4D4D4)),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF6F6A7C),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -52,8 +54,10 @@ class SmallPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: const Color(0xFFF1F1ED),
+      color: theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         borderRadius: BorderRadius.circular(999),
@@ -62,15 +66,15 @@ class SmallPillButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFD4D4D4)),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF6F6A7C),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -91,8 +95,12 @@ class PrimaryPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: onTap == null ? const Color(0xFFB7CAE4) : const Color(0xFF3B82F6),
+      color: onTap == null
+          ? theme.colorScheme.primary.withValues(alpha: 0.45)
+          : theme.colorScheme.primary,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         borderRadius: BorderRadius.circular(999),
@@ -103,10 +111,10 @@ class PrimaryPillButton extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
             ),
           ),
         ),
@@ -127,8 +135,12 @@ class DangerPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: onTap == null ? const Color(0xFFE7BFC1) : const Color(0xFFD64545),
+      color: onTap == null
+          ? theme.colorScheme.error.withValues(alpha: 0.45)
+          : theme.colorScheme.error,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         borderRadius: BorderRadius.circular(999),
@@ -139,10 +151,10 @@ class DangerPillButton extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: theme.colorScheme.onError,
             ),
           ),
         ),
@@ -165,10 +177,12 @@ class IconPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: const Color(0xFFF1F1ED),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
@@ -178,12 +192,12 @@ class IconPillButton extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: const Color(0xFFD4D4D4)),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Icon(
               icon,
               size: 20,
-              color: const Color(0xFF6F6A7C),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),

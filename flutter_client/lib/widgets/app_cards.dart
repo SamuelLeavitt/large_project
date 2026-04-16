@@ -10,11 +10,13 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F1ED),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFDADADA)),
+        border: Border.all(color: theme.dividerColor),
       ),
       padding: const EdgeInsets.all(20),
       child: child,
@@ -32,9 +34,11 @@ class TabPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
-      color: const Color(0xFFF6F6F6),
+      color: theme.scaffoldBackgroundColor,
       child: child,
     );
   }
@@ -47,19 +51,21 @@ class EmptyStateText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFD9D9D9)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: theme.textTheme.bodyMedium?.copyWith(
           fontSize: 15,
-          color: Color(0xFF6E6A7C),
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );
