@@ -8,6 +8,11 @@ const Logo = () => {
                 alignItems: 'center',
                 cursor: 'pointer'
             }}>
+               <img
+                    src="/logo.svg"
+                    alt="FitTrack logo"
+                    style={{ width: '40px', height: '40px', objectFit: 'contain', marginRight: '8px' }}
+                /> 
                 <span style={{
                     fontSize: '1.4rem',
                     fontWeight: '800',
@@ -16,9 +21,9 @@ const Logo = () => {
                     textTransform: 'uppercase',
                     fontFamily: "'Inter', sans-serif"
                 }}>
-                    Workout
+                    Fit
                     <span style={{ color: 'var(--accent-color, var(--accent))' }}>
-                        Planner
+                        Track
                     </span>
                 </span>
             </div>
