@@ -39,7 +39,7 @@ const VerifyEmail = () => {
 
   return (
     <div style={{ maxWidth: "520px", margin: "100px auto", padding: "40px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "24px" }}>Verify Email</h1>
+      <h1 style={{ textAlign: "center" }}>Verify Email</h1>
       <p style={{ textAlign: "center", color: status === "error" ? "red" : "inherit" }}>{message}</p>
       <div style={{ marginTop: "24px", textAlign: "center" }}>
         <Link to="/login" style={{ color: "#007bff", textDecoration: "none", fontWeight: 500 }}>
