@@ -119,7 +119,7 @@ const Workout = () => {
   //2. workout builder page
   //3. exercise picker page
   const [builderStep, setBuilderStep] = useState<BuilderStep>("hidden");
-  const [selectedZone, setSelectedZone] = useState("");
+  const [selectedZone, setSelectedZone] = useState("all");
   const [zoneOptions, setZoneOptions] = useState<string[]>([]);
   const [workoutName, setWorkoutName] = useState("");
   const [builderExercises, setBuilderExercises] = useState<WorkoutExercise[]>([]);
@@ -162,7 +162,6 @@ const Workout = () => {
       .then((data) => {
         const muscles = data.primaryMuscles ?? [];
         setZoneOptions(muscles);
-        if (muscles.length > 0) setSelectedZone(muscles[0]);
       });
   }, []);
 
@@ -173,11 +172,12 @@ const Workout = () => {
   // Mirrors ExerciseLibrary's fetchExercises: hits the backend with category + search,
   // reruns automatically whenever the zone or active search changes.
   const fetchExercises = useCallback(async () => {
-    if (!selectedZone) return;
     setLoadingExercises(true);
     try {
       const params = new URLSearchParams();
-      params.set("muscle", selectedZone);
+      if (selectedZone !== "all") {
+        params.set("muscle", selectedZone);
+      }
       if (activeSearch) params.set("search", activeSearch);
       params.set("limit", "50");
       const res = await fetch(`/api/exercises?${params}`);
@@ -262,7 +262,7 @@ const Workout = () => {
   //Starts the create plan flow on a dedicated naming page first.
   const handleCreateNewWorkout = () => {
     setWorkoutName("");
-    setSelectedZone(zoneOptions[0] ?? "");
+    setSelectedZone("all");
     setBuilderSearch("");
     setBuilderExercises([]);
     setBuilderStep("name");
@@ -281,7 +281,7 @@ const Workout = () => {
   const handleCloseBuilder = () => {
     setBuilderStep("hidden");
     setWorkoutName("");
-    setSelectedZone(zoneOptions[0] ?? "");
+    setSelectedZone("all");
     setBuilderSearch("");
     setBuilderExercises([]);
   };
@@ -310,7 +310,7 @@ const Workout = () => {
       await saveWorkout(newWorkout);
       await refreshSavedWorkouts();
       setWorkoutName("");
-      setSelectedZone(zoneOptions[0] ?? "");
+      setSelectedZone("all");
       setBuilderSearch("");
       setBuilderExercises([]);
       setBuilderStep("hidden");
@@ -545,7 +545,7 @@ const Workout = () => {
     setQuickStartExercises([]);
     setQuickStartLogs([]);
     setQuickStartSearch("");
-    setSelectedZone(zoneOptions[0] ?? "");
+    setSelectedZone("all");
     setBuilderStep("hidden");
     setQuickStartPlanName("");
     resetWorkoutInputs();
@@ -557,7 +557,7 @@ const Workout = () => {
     setQuickStartExercises([]);
     setQuickStartLogs([]);
     setQuickStartSearch("");
-    setSelectedZone(zoneOptions[0] ?? "");
+    setSelectedZone("all");
     setBuilderStep("quickStartBuilder");
     resetWorkoutInputs();
     setElapsedSeconds(0);

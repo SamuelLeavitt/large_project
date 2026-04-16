@@ -63,7 +63,7 @@ router.get("/", async (req: Request, res: Response) => {
     if (level) filter.level = String(level);
 
     if (search) {
-      filter.$text = { $search: String(search) };
+      filter.name = { $regex: String(search), $options: "i" };
     }
 
     const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
@@ -74,15 +74,7 @@ router.get("/", async (req: Request, res: Response) => {
     const sortField = allowedSorts.has(String(sort)) ? String(sort) : "name";
     const sortOrder = String(order) === "desc" ? -1 : 1;
 
-    let query = Exercise.find(filter);
-
-    if (search) {
-      query = query
-        .select({ score: { $meta: "textScore" } })
-        .sort({ score: { $meta: "textScore" } });
-    } else {
-      query = query.sort({ [sortField]: sortOrder });
-    }
+    let query = Exercise.find(filter).sort({ [sortField]: sortOrder });
 
     const [items, total] = await Promise.all([
       query.skip(skip).limit(limitNum).lean(),

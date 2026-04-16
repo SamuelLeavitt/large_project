@@ -107,6 +107,7 @@ const AddExercise = ({
                 minWidth: "150px",
               }}
             >
+              <option value="all">Choose a Muscle Group</option>
               {zoneOptions.map((zone) => (
                 <option key={zone} value={zone}>
                   {Cap(zone)}
