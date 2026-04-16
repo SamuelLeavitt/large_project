@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart';
 import '../widgets/app_header.dart';
 import 'tabs/profile_tab.dart';
 import 'tabs/search_exercises_tab.dart';
@@ -20,6 +21,20 @@ class _HomeScreenState extends State<HomeScreen> {
     WorkoutHomeTab(),
     ProfileTab(),
   ];
+
+  void handleSessionExpired(BuildContext context, Object error) {
+    if (error is SessionExpiredException) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your session expired. Please log in again.'),
+          ),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

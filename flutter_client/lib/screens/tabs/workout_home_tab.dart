@@ -40,6 +40,17 @@ class _WorkoutHomeTabState extends State<WorkoutHomeTab> {
       });
     } catch (e) {
       if (!mounted) return;
+
+      if (e is SessionExpiredException) {
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Your session expired. Please log in again.'),
+            ),
+          );
+          return;
+      }
+
       setState(() {
         _error = e.toString().replaceFirst('Exception: ', '');
       });

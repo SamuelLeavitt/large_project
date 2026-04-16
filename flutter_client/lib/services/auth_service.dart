@@ -3,6 +3,17 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+class SessionExpiredException implements Exception {
+  final String message;
+
+  const SessionExpiredException([
+    this.message = 'Your session expired. Please log in again.',
+  ]);
+
+  @override
+  String toString() => message;
+}
+
 class CurrentUser {
   final String id;
   final String username;
@@ -59,12 +70,30 @@ class AuthService {
 
     if (auth) {
       if (token == null || token!.isEmpty) {
-        throw Exception('You are not logged in.');
+        throw const SessionExpiredException();
       }
       headers['Authorization'] = 'Bearer $token';
     }
 
     return headers;
+  }
+
+  static Map<String, dynamic> _decodeObject(http.Response res) {
+    try {
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception(
+        'Server returned non-JSON response (status ${res.statusCode}).',
+      );
+    }
+  }
+
+  static Future<void> _handleUnauthorizedResponse(http.Response res) async {
+    if (res.statusCode == 401) {
+      currentUser = null;
+      await _persistToken(null);
+      throw const SessionExpiredException();
+    }
   }
 
   static Future<Map<String, dynamic>> login(String email, String password) async {
@@ -77,14 +106,7 @@ class AuthService {
       }),
     );
 
-    Map<String, dynamic> data = {};
-    try {
-      data = jsonDecode(res.body) as Map<String, dynamic>;
-    } catch (_) {
-      throw Exception(
-        'Server returned non-JSON response (status ${res.statusCode}).',
-      );
-    }
+    final data = _decodeObject(res);
 
     if (res.statusCode != 200) {
       throw Exception(
@@ -108,14 +130,8 @@ class AuthService {
       headers: _headers(auth: true),
     );
 
-    Map<String, dynamic> data = {};
-    try {
-      data = jsonDecode(res.body) as Map<String, dynamic>;
-    } catch (_) {
-      throw Exception(
-        'Server returned non-JSON response (status ${res.statusCode}).',
-      );
-    }
+    await _handleUnauthorizedResponse(res);
+    final data = _decodeObject(res);
 
     if (res.statusCode != 200) {
       throw Exception(
@@ -141,14 +157,8 @@ class AuthService {
       }),
     );
 
-    Map<String, dynamic> data = {};
-    try {
-      data = jsonDecode(res.body) as Map<String, dynamic>;
-    } catch (_) {
-      throw Exception(
-        'Server returned non-JSON response (status ${res.statusCode}).',
-      );
-    }
+    await _handleUnauthorizedResponse(res);
+    final data = _decodeObject(res);
 
     if (res.statusCode != 200) {
       throw Exception(
@@ -176,14 +186,7 @@ class AuthService {
       }),
     );
 
-    Map<String, dynamic> data = {};
-    try {
-      data = jsonDecode(res.body) as Map<String, dynamic>;
-    } catch (_) {
-      throw Exception(
-        'Server returned non-JSON response (status ${res.statusCode}).',
-      );
-    }
+    final data = _decodeObject(res);
 
     if (res.statusCode != 200 && res.statusCode != 201) {
       throw Exception(
@@ -201,14 +204,7 @@ class AuthService {
       }),
     );
 
-    Map<String, dynamic> data = {};
-    try {
-      data = jsonDecode(res.body) as Map<String, dynamic>;
-    } catch (_) {
-      throw Exception(
-        'Server returned non-JSON response (status ${res.statusCode}).',
-      );
-    }
+    final data = _decodeObject(res);
 
     if (res.statusCode != 200) {
       throw Exception(
@@ -230,14 +226,7 @@ class AuthService {
       }),
     );
 
-    Map<String, dynamic> data = {};
-    try {
-      data = jsonDecode(res.body) as Map<String, dynamic>;
-    } catch (_) {
-      throw Exception(
-        'Server returned non-JSON response (status ${res.statusCode}).',
-      );
-    }
+    final data = _decodeObject(res);
 
     if (res.statusCode != 200) {
       throw Exception(

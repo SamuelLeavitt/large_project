@@ -192,6 +192,17 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
+
+      if (e is SessionExpiredException) {
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Your session expired. Please log in again.'),
+            ),
+          );
+          return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
