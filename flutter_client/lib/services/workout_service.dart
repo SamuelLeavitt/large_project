@@ -350,8 +350,8 @@ class WorkoutSessionModel {
 }
 
 class WorkoutService {
-  static const String _workoutsBase = 'https://cop4331linhtran.studio';
-  static const String _exercisesBase = 'https://cop4331linhtran.studio';
+  static const String _workoutsBase = 'https://cop4331linhtran.studio/api/workouts';
+  static const String _exercisesBase = 'https://cop4331linhtran.studio/api/exercises';
 
   static Map<String, String> _jsonHeaders({bool auth = false}) {
     final headers = <String, String>{
