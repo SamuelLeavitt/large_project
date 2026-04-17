@@ -95,4 +95,4 @@ flutter:
 
 flutter_launcher_icons:
   android: true
-  image_path: "./assets/images/app_icon.jpg"
+  image_path: "./assets/images/logo.svg"
