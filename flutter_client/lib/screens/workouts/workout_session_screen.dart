@@ -25,7 +25,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
   late final TextEditingController _nameController;
   Timer? _timer;
   int _elapsedSeconds = 0;
-  bool _isRunning = true;
+  bool _isRunning = false;
   bool _saving = false;
 
   late List<ActiveWorkoutExercise> _exercises;
@@ -273,7 +273,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                   children: [
                     Expanded(
                       child: SmallPillButton(
-                        label: _isRunning ? 'Pause' : 'Resume',
+                        label: _isRunning ? 'Pause' : (_elapsedSeconds == 0 ? 'Start' : 'Resume'),
                         onTap: _toggleStopwatch,
                       ),
                     ),
@@ -395,27 +395,25 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                                             Row(
                                               children: [
                                                 Expanded(
-                                                  child: TextField(
-                                                    keyboardType: TextInputType.number,
-                                                    controller: TextEditingController(
-                                                      text: set.weight == 0 ? '' : '${set.weight}',
-                                                    ),
-                                                    decoration: appTextFieldDecoration(context, 'lbs'),
-                                                    onChanged: (value) => _updateSet(
-                                                      exerciseIndex,
-                                                      setIndex,
-                                                      'weight',
-                                                      value,
-                                                    ),
+                                                  child: TextFormField(
+                                                      key: ValueKey('weight_${exercise.exerciseId}_$setIndex'),
+                                                      keyboardType: TextInputType.number,
+                                                      initialValue: set.weight == 0 ? '' : '${set.weight}',
+                                                      decoration: appTextFieldDecoration(context, 'lbs'),
+                                                      onChanged: (value) => _updateSet(
+                                                        exerciseIndex,
+                                                        setIndex,
+                                                        'weight',
+                                                        value,
+                                                      ),
                                                   ),
                                                 ),
                                                 const SizedBox(width: 10),
                                                 Expanded(
-                                                  child: TextField(
+                                                  child: TextFormField(
+                                                    key: ValueKey('reps_${exercise.exerciseId}_$setIndex'),
                                                     keyboardType: TextInputType.number,
-                                                    controller: TextEditingController(
-                                                      text: set.reps == 0 ? '' : '${set.reps}',
-                                                    ),
+                                                    initialValue: set.reps == 0 ? '' : '${set.reps}',
                                                     decoration: appTextFieldDecoration(context, 'reps'),
                                                     onChanged: (value) => _updateSet(
                                                       exerciseIndex,

@@ -14,4 +14,4 @@ Example prompt
 
 After using the above prompt, I inspected the results in the mongosh CLI and made adjustments to meet my needs and to match desired results.
 
-Mobile application prompts were very lengthy but included existing frontend code, desired project organization and figma wireframes to generate initial / boilerplate code for the mobile application. After generating the code, it was refined and reorganized heavily manually to compensate for AI shortcomings
+Mobile application prompts were lengthy but included existing frontend code, desired project organization and figma wireframes to generate initial / boilerplate code for the mobile application. After generating the code, it was refined and reorganized heavily manually to compensate for AI shortcomings
