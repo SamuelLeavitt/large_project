@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFF6F6F6),
       body: Column(
         children: [
-          const AppHeader(title: 'PixelFit'),
+          const AppHeader(title: 'FitTrack'),
           Expanded(
             child: IndexedStack(
               index: _currentIndex,

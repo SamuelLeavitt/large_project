@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       valueListenable: ThemeService.themeMode,
       builder: (context, themeMode, _) {
         return MaterialApp(
-          title: 'Workout App',
+          title: 'PixelFit',
           debugShowCheckedModeBanner: false,
           themeMode: themeMode,
           theme: ThemeData(
