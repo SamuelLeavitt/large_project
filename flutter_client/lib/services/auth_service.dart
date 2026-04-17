@@ -38,7 +38,7 @@ class CurrentUser {
 }
 
 class AuthService {
-  static const String baseUrl = 'https://www.cop4331linhtran.studio';
+  static const String baseUrl = 'https://cop4331linhtran.studio';
   static const String _tokenStorageKey = 'auth_token';
 
   static String? token;
